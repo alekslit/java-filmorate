@@ -73,7 +73,7 @@ public class UserControllerTests {
                 .id(1L)
                 .build();
 
-        final AlreadyExistException exception =assertThrows(
+        final AlreadyExistException exception = assertThrows(
                 AlreadyExistException.class,
                 () -> userController.addUser(user));
 
