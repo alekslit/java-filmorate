@@ -7,6 +7,7 @@ import javax.validation.ConstraintValidatorContext;
 
 public class NotContainsSymbolValidator implements ConstraintValidator<NotContainsSymbol, String> {
     private String selectSymbol;
+
     @Override
     public void initialize(NotContainsSymbol constraintAnnotation) {
         selectSymbol = constraintAnnotation.value();
