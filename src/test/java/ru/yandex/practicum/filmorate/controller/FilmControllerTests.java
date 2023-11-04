@@ -29,11 +29,15 @@ public class FilmControllerTests {
             .setPrettyPrinting()
             .create();
     private static final String URL = "http://localhost:8080";
+    private static final URI FILMS_URI = URI.create(URL + "/films");
+    private static final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
 
     private FilmController filmController;
     private Film film;
     private Film filmByValidationCheck;
     private HttpClient httpClient;
+    private Integer responseStatusCode;
+
 
     private void init() {
         filmController = new FilmController();
@@ -60,7 +64,7 @@ public class FilmControllerTests {
 
     // Добавление нового фильма + получение списка всех фильмов:
     @Test
-     void shouldAddNewFilmAndGetAllFilms() {
+    void shouldAddNewFilmAndGetAllFilms() {
         final List<Film> filmsList = filmController.getAllFilms();
 
         assertNotNull(filmsList, "Список пуст, фильм не добавлен (shouldAddNewFilmAndGetAllFilms)");
@@ -113,51 +117,37 @@ public class FilmControllerTests {
     /*---Тесты валидации объекта Film---*/
     // поле name = null:
     @Test
-    public void shouldNot200StatusCodeWhenFilmNameIsNull() {
-        final URI uri = URI.create(URL + "/films");
-        Integer responseStatusCode = 200;
+    public void shouldNot200StatusCodeWhenFilmNameIsNull() throws IOException, InterruptedException {
         filmByValidationCheck = filmByValidationCheck.toBuilder()
                 .name(null)
                 .build();
-        final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
         final HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(uri)
+                .uri(FILMS_URI)
                 .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(filmByValidationCheck, Film.class)))
                 .build();
 
-        try {
-            responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
-        } catch (InterruptedException | IOException exception) {
-            System.out.println("Во время работы приложения возникла ошибка" + exception.getMessage());
-        }
+        responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
         assertNotEquals(200, responseStatusCode, "Ошибка валидации при Film.name = null");
     }
 
     // description.length() = 201:
     @Test
-    void shouldNot200StatusCodeWhenFilmDescriptionLengthIs201() {
-        final URI uri = URI.create(URL + "/films");
-        Integer responseStatusCode = 200;
+    void shouldNot200StatusCodeWhenFilmDescriptionLengthIs201() throws IOException, InterruptedException {
         filmByValidationCheck = filmByValidationCheck.toBuilder()
                 .description("12345678901234567890123456789012345678901234567890"
                         + "12345678901234567890123456789012345678901234567890"
                         + "12345678901234567890123456789012345678901234567890"
                         + "12345678901234567890123456789012345678901234567890" + "1")
                 .build();
-        final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
         final HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(uri)
+                .uri(FILMS_URI)
                 .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(filmByValidationCheck, Film.class)))
                 .build();
 
-        try {
-            responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
-        } catch (InterruptedException | IOException exception) {
-            System.out.println("Во время работы приложения возникла ошибка" + exception.getMessage());
-        }
+        responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
         assertNotEquals(200, responseStatusCode, "Ошибка валидации при"
                 + " Film.description.length() = 201");
@@ -165,25 +155,18 @@ public class FilmControllerTests {
 
     // releaseDate < 1895-12-28:
     @Test
-    void shouldNot200StatusCodeWhenFilmReleaseDateIsBeforeMovieBirthday() {
+    void shouldNot200StatusCodeWhenFilmReleaseDateIsBeforeMovieBirthday() throws IOException, InterruptedException {
         final LocalDate beforeMovieBirthday = LocalDate.of(1895, 12, 27);
-        final URI uri = URI.create(URL + "/films");
-        Integer responseStatusCode = 200;
         filmByValidationCheck = filmByValidationCheck.toBuilder()
                 .releaseDate(beforeMovieBirthday)
                 .build();
-        final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
         final HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(uri)
+                .uri(FILMS_URI)
                 .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(filmByValidationCheck, Film.class)))
                 .build();
 
-        try {
-            responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
-        } catch (InterruptedException | IOException exception) {
-            System.out.println("Во время работы приложения возникла ошибка" + exception.getMessage());
-        }
+        responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
         assertNotEquals(200, responseStatusCode, "Ошибка валидации при"
                 + " Film.releaseDate < 1895-12-28");
@@ -191,24 +174,17 @@ public class FilmControllerTests {
 
     // duration = 0:
     @Test
-    void shouldNot200StatusCodeWhenFilmDurationIsZero() {
-        final URI uri = URI.create(URL + "/films");
-        Integer responseStatusCode = 200;
+    void shouldNot200StatusCodeWhenFilmDurationIsZero() throws IOException, InterruptedException {
         filmByValidationCheck = filmByValidationCheck.toBuilder()
                 .duration(0)
                 .build();
-        final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
         final HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(uri)
+                .uri(FILMS_URI)
                 .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(filmByValidationCheck, Film.class)))
                 .build();
 
-        try {
-            responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
-        } catch (InterruptedException | IOException exception) {
-            System.out.println("Во время работы приложения возникла ошибка" + exception.getMessage());
-        }
+        responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
         assertNotEquals(200, responseStatusCode, "Ошибка валидации при"
                 + " Film.duration = 0");

@@ -29,11 +29,14 @@ public class UserControllerTests {
             .setPrettyPrinting()
             .create();
     private static final String URL = "http://localhost:8080";
+    private static final URI USERS_URI = URI.create(URL + "/users");
+    private static final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
 
     private UserController userController;
     private User user;
     private User userByValidationCheck;
     private HttpClient httpClient;
+    private Integer responseStatusCode;
 
     private void init() {
         userController = new UserController();
@@ -112,48 +115,34 @@ public class UserControllerTests {
     /*---Тесты валидации объекта User---*/
     // email без @:
     @Test
-    void shouldNot200StatusCodeWhenUserEmailWithoutAt() {
-        final URI uri = URI.create(URL + "/users");
-        Integer responseStatusCode = 200;
+    void shouldNot200StatusCodeWhenUserEmailWithoutAt() throws IOException, InterruptedException {
         userByValidationCheck = userByValidationCheck.toBuilder()
                 .email("withoutsobakayandex.ru")
                 .build();
-        final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
         final HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(uri)
+                .uri(USERS_URI)
                 .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(userByValidationCheck, User.class)))
                 .build();
 
-        try {
-            responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
-        } catch (InterruptedException | IOException exception) {
-            System.out.println("Во время работы приложения возникла ошибка" + exception.getMessage());
-        }
+        responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
         assertNotEquals(200, responseStatusCode, "Ошибка валидации при User.email без '@'");
     }
 
     // login с пробелами:
     @Test
-    void shouldNot200StatusCodeWhenUserLoginWithBlankSpace() {
-        final URI uri = URI.create(URL + "/users");
-        Integer responseStatusCode = 200;
+    void shouldNot200StatusCodeWhenUserLoginWithBlankSpace() throws IOException, InterruptedException {
         userByValidationCheck = userByValidationCheck.toBuilder()
                 .login("n e g o d n i k")
                 .build();
-        final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
         final HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(uri)
+                .uri(USERS_URI)
                 .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(userByValidationCheck, User.class)))
                 .build();
 
-        try {
-            responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
-        } catch (InterruptedException | IOException exception) {
-            System.out.println("Во время работы приложения возникла ошибка" + exception.getMessage());
-        }
+        responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
         assertNotEquals(200, responseStatusCode, "Ошибка валидации при User.login c пробелами");
     }
@@ -173,25 +162,18 @@ public class UserControllerTests {
 
     // User.birthday = текущая_дата + 1:
     @Test
-    void shouldNot200StatusCodeWhenUserBirthdayIsFutureDay() {
+    void shouldNot200StatusCodeWhenUserBirthdayIsFutureDay() throws IOException, InterruptedException {
         final LocalDate futureDay = LocalDate.now().plusDays(1);
-        final URI uri = URI.create(URL + "/users");
-        Integer responseStatusCode = 200;
         userByValidationCheck = userByValidationCheck.toBuilder()
                 .birthday(futureDay)
                 .build();
-        final HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
         final HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(uri)
+                .uri(USERS_URI)
                 .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(userByValidationCheck, User.class)))
                 .build();
 
-        try {
-            responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
-        } catch (InterruptedException | IOException exception) {
-            System.out.println("Во время работы приложения возникла ошибка" + exception.getMessage());
-        }
+        responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
         assertNotEquals(200, responseStatusCode, "Ошибка валидации при "
                 + "User.birthday = текущая_дата + 1");
