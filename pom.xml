@@ -16,9 +16,9 @@
     <properties>
         <java.version>11</java.version>
         <lombok.version>1.18.30</lombok.version>
-        <logbook-spring-boot-starter.version>2.16.0</logbook-spring-boot-starter.version>
         <gson.version>2.10.1</gson.version>
         <junit.version>4.12</junit.version>
+        <logbook-spring-boot-starter.version>2.16.0</logbook-spring-boot-starter.version>
     </properties>
     <dependencies>
         <dependency>
@@ -42,6 +42,7 @@
         <dependency>
             <groupId>org.zalando</groupId>
             <artifactId>logbook-spring-boot-starter</artifactId>
+            <version>${logbook-spring-boot-starter.version}</version>
         </dependency>
 
         <dependency>
