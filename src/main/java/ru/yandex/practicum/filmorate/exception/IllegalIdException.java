@@ -15,6 +15,7 @@ public class IllegalIdException extends RuntimeException {
     public static final String ILLEGAL_NEW_USER_ID_ADVICE = "Проверьте id пользователя. Новый пользователь"
             + " не должен содержать id. Программа генерирует id для нового пользователя автоматически.";
 
+    // совет пользователю при возникновении исключения:
     private final String adviceToUser;
 
     public IllegalIdException(String message, String adviceToUser) {

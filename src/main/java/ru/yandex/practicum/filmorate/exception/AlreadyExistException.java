@@ -9,6 +9,8 @@ public class AlreadyExistException extends RuntimeException {
             + " Программа генерирует id для нового фильма автоматически.";
     public static final String USER_ALREADY_EXIST_ADVICE = "Проверьте id пользователя. Новый пользователь"
             + " не должен содержать id. Программа генерирует id для нового пользователя автоматически.";
+
+    // совет пользователю при возникновении исключения:
     private final String adviceToUser;
 
     public AlreadyExistException(String message, String adviceToUser) {
