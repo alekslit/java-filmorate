@@ -49,7 +49,7 @@ public class FilmController {
 
     // получение Film по id:
     @GetMapping("/{id}")
-    public Film getFilmById (@PathVariable Long id) {
+    public Film getFilmById(@PathVariable Long id) {
         checkId(id, PATH_VARIABLE_ID);
         return filmStorage.getFilmById(id);
     }
