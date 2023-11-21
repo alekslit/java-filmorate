@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserService {
-    private final static String ADD_TO_FRIEND_MESSAGE = "Пользователи успешно добавлены в друзья. Их id: ";
-    private final static String REMOVE_FROM_FRIEND_MESSAGE = "Пользователи успешно удалены из друзей. Их id: ";
+    private static final String ADD_TO_FRIEND_MESSAGE = "Пользователи успешно добавлены в друзья. Их id: ";
+    private static final String REMOVE_FROM_FRIEND_MESSAGE = "Пользователи успешно удалены из друзей. Их id: ";
 
     private final UserStorage userStorage;
 
