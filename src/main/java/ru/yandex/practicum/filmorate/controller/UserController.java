@@ -47,7 +47,7 @@ public class UserController {
 
     // получение User по id:
     @GetMapping("/{id}")
-    public User getUserById (@PathVariable Long id) {
+    public User getUserById(@PathVariable Long id) {
         checkId(id, PATH_VARIABLE_ID);
         return userStorage.getUserById(id);
     }
