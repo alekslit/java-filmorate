@@ -1,103 +1,98 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.IllegalIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.USER_ALREADY_EXIST_MESSAGE;
-import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_USER_ID_MESSAGE;
+import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException.*;
 
 // класс контроллер для пользователей:
-@Slf4j
 @RestController
+@Slf4j
 @RequestMapping("/users")
 public class UserController {
-    // храним данные в памяти приложения:
-    private final Map<Long, User> users = new HashMap<>();
-    private Long currentUserIdNumber = 0L;
+    private final UserStorage userStorage;
+    private final UserService userService;
 
-    // создание пользователя:
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+        this.userStorage = userService.getUserStorage();
+    }
+
+    // создание User:
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        final User newUser = checkName(user);
-
-        if (users.containsKey(newUser.getId())) {
-            log.debug("{}: " + USER_ALREADY_EXIST_MESSAGE + newUser.getLogin(),
-                    AlreadyExistException.class.getSimpleName());
-            throw new AlreadyExistException(USER_ALREADY_EXIST_MESSAGE + newUser.getLogin());
-        }
-        if (user.getId() != null) {
-            log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + newUser.getId(),
-                    IllegalIdException.class.getSimpleName());
-            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + newUser.getId());
-        }
-        newUser.setId(generateId());
-        log.debug("Добавлен новый пользователь: " + newUser.getLogin() + ", с id = " + newUser.getId());
-        users.put(newUser.getId(), newUser);
-
-        return newUser;
+        return userStorage.addUser(user);
     }
 
-    // обновление пользователя:
+    // обновление User:
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        final User newUser = checkName(user);
-
-        if (users.containsKey(newUser.getId())) {
-            users.put(newUser.getId(), newUser);
-            log.debug("Обновлена информация о пользователе: " + newUser.getLogin() + ", с id = " + newUser.getId());
-        } else if (newUser.getId() == null) {
-            newUser.setId(generateId());
-            users.put(newUser.getId(), newUser);
-            log.debug("Добавлен новый пользователь: " + newUser.getLogin() + ", с id = " + newUser.getId());
-        } else {
-            log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + newUser.getId(),
-                    IllegalIdException.class.getSimpleName());
-            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + newUser.getId());
-        }
-
-        return newUser;
+        return userStorage.updateUser(user);
     }
 
-    // получение списка всех пользователей:
+    // получение списка всех User:
     @GetMapping
     public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+        return userStorage.getAllUsers();
     }
 
-    // генератор id:
-    private Long generateId() {
-        return ++currentUserIdNumber;
+    // получение User по id:
+    @GetMapping("/{id}")
+    public User getUserById (@PathVariable Long id) {
+        checkId(id, PATH_VARIABLE_ID);
+        return userStorage.getUserById(id);
     }
 
-    // проверяем имя пользователя, если пустое, то name = login:
-    public User checkName(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            final User newUser = user.toBuilder()
-                    .name(user.getLogin())
-                    .build();
-            log.debug("User.name = " + user.getName() + ", заменяем User.name на User.login = " + user.getLogin());
-            return newUser;
+    // добавление User в друзья:
+    @PutMapping("/{id}/friends/{friendId}")
+    public String addUserToFriends(@PathVariable Long id, @PathVariable Long friendId) {
+        checkId(id, PATH_VARIABLE_ID);
+        checkId(friendId, PATH_VARIABLE_FRIEND_ID);
+
+        return userService.addUserToFriends(id, friendId);
+    }
+
+    // удаление User из друзей:
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public String removeUserFromFriends(@PathVariable Long id, @PathVariable Long friendId) {
+        checkId(id, PATH_VARIABLE_ID);
+        checkId(friendId, PATH_VARIABLE_FRIEND_ID);
+
+        return userService.removeUserFromFriends(id, friendId);
+    }
+
+    // получаем список друзей User:
+    @GetMapping("/{id}/friends")
+    public List<User> getAllFriendsList(@PathVariable Long id) {
+        checkId(id, PATH_VARIABLE_ID);
+        return userService.getAllFriendsList(id);
+    }
+
+    // получаем список общих друзей:
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        checkId(id, PATH_VARIABLE_ID);
+        checkId(otherId, PATH_VARIABLE_OTHER_ID);
+
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    // вспомогательный метод для проверки id:
+    public void checkId(Long id, String pathVariable) {
+        if (id == null || id <= 0) {
+            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id,
+                    IncorrectPathVariableException.class.getSimpleName());
+            throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
+                    PATH_VARIABLE_ID_ADVICE);
         }
-
-        return user;
-    }
-
-    // вспомогательный метод (получить фильм по id):
-    public User getUserById(Long userId) {
-        if (users.get(userId) == null) {
-            log.debug("Нет User с таким id = " + userId);
-            return null;
-        }
-
-        return users.get(userId);
     }
 }
