@@ -22,6 +22,22 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
+    public Film addFilm(Film film) {
+        return filmStorage.addFilm(film);
+    }
+
+    public Film updateFilm(Film film) {
+        return filmStorage.updateFilm(film);
+    }
+
+    public List<Film> getAllFilms() {
+        return filmStorage.getAllFilms();
+    }
+
+    public Film getFilmById(Long id) {
+        return filmStorage.getFilmById(id);
+    }
+
     public String addLikeToFilm(Long id, Long userId) {
         Film film = filmStorage.getFilmById(id);
         User user = userStorage.getUserById(userId);
@@ -45,9 +61,5 @@ public class FilmService {
                 .collect(Collectors.toList());
 
         return topFilmsForLikes;
-    }
-
-    public FilmStorage getFilmStorage() {
-        return filmStorage;
     }
 }

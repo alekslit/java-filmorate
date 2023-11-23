@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -20,38 +19,36 @@ import static ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterE
 @Slf4j
 @RequestMapping("/films")
 public class FilmController {
-    private final FilmStorage filmStorage;
     private final FilmService filmService;
 
     @Autowired
     public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.filmStorage = filmService.getFilmStorage();
     }
 
     // добавление Film:
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        return filmStorage.addFilm(film);
+        return filmService.addFilm(film);
     }
 
     // обновление Film:
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        return filmStorage.updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     // получение списка всех Film:
     @GetMapping
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return filmService.getAllFilms();
     }
 
     // получение Film по id:
     @GetMapping("/{id}")
     public Film getFilmById(@PathVariable Long id) {
         checkId(id, PATH_VARIABLE_ID);
-        return filmStorage.getFilmById(id);
+        return filmService.getFilmById(id);
     }
 
     // User ставит лайк фильму:

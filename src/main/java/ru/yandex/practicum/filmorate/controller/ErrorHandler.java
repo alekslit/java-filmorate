@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -11,6 +12,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException;
 
 @RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
+@Slf4j
 public class ErrorHandler {
     /*---Обработчики для статуса 400 (Bad request)---*/
     @ExceptionHandler
@@ -20,6 +22,7 @@ public class ErrorHandler {
                 .error(e.getMessage())
                 .adviceToUser(e.getAdviceToUser())
                 .build();
+        log.debug("{}: " + e.getMessage(), IncorrectRequestParameterException.class.getSimpleName());
 
         return errorResponse;
     }
@@ -31,6 +34,8 @@ public class ErrorHandler {
                 .error("Ошибка валидации данных из запроса.")
                 .adviceToUser(e.getFieldError().getDefaultMessage())
                 .build();
+        log.debug("{}: " + e.getFieldError().getDefaultMessage(),
+                MethodArgumentNotValidException.class.getSimpleName());
 
         return errorResponse;
     }
@@ -42,6 +47,7 @@ public class ErrorHandler {
                 .error(e.getMessage())
                 .adviceToUser(e.getAdviceToUser())
                 .build();
+        log.debug("{}: " + e.getMessage(), AlreadyExistException.class.getSimpleName());
 
         return errorResponse;
     }
@@ -54,6 +60,7 @@ public class ErrorHandler {
                 .error(e.getMessage())
                 .adviceToUser(e.getAdviceToUser())
                 .build();
+        log.debug("{}: " + e.getMessage(), IllegalIdException.class.getSimpleName());
 
         return errorResponse;
     }
@@ -65,6 +72,7 @@ public class ErrorHandler {
                 .error(e.getMessage())
                 .adviceToUser(e.getAdviceToUser())
                 .build();
+        log.debug("{}: " + e.getMessage(), IncorrectPathVariableException.class.getSimpleName());
 
         return errorResponse;
     }
@@ -77,6 +85,7 @@ public class ErrorHandler {
                 .error("Произошла непредвиденная ошибка.")
                 .adviceToUser("Пожалуйста обратитесь в службу технической поддержки.")
                 .build();
+        log.debug("{}: " + e.getMessage(), e.getClass().getSimpleName());
 
         return errorResponse;
     }

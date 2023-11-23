@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -18,38 +17,36 @@ import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableExcep
 @Slf4j
 @RequestMapping("/users")
 public class UserController {
-    private final UserStorage userStorage;
     private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
-        this.userStorage = userService.getUserStorage();
     }
 
     // создание User:
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        return userStorage.addUser(user);
+        return userService.addUser(user);
     }
 
     // обновление User:
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        return userStorage.updateUser(user);
+        return userService.updateUser(user);
     }
 
     // получение списка всех User:
     @GetMapping
     public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userService.getAllUsers();
     }
 
     // получение User по id:
     @GetMapping("/{id}")
     public User getUserById(@PathVariable Long id) {
         checkId(id, PATH_VARIABLE_ID);
-        return userStorage.getUserById(id);
+        return userService.getUserById(id);
     }
 
     // добавление User в друзья:

@@ -23,6 +23,22 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+    public User addUser(User user) {
+        return userStorage.addUser(user);
+    }
+
+    public User updateUser(User user) {
+        return userStorage.updateUser(user);
+    }
+
+    public List<User> getAllUsers() {
+        return userStorage.getAllUsers();
+    }
+
+    public User getUserById(Long id) {
+        return userStorage.getUserById(id);
+    }
+
     public String addUserToFriends(Long id, Long friendId) {
         User user = userStorage.getUserById(id);
         User friend = userStorage.getUserById(friendId);
@@ -65,9 +81,5 @@ public class UserService {
                 .collect(Collectors.toList());
 
         return commonFriends;
-    }
-
-    public UserStorage getUserStorage() {
-        return userStorage;
     }
 }
