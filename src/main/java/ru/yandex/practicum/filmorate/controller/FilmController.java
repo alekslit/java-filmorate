@@ -1,87 +1,94 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.IllegalIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
+import ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.FILM_ALREADY_EXIST_MESSAGE;
-import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_FILM_ID_MESSAGE;
+import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException.*;
+import static ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException.*;
 
 // класс контроллер для фильмов:
-@Slf4j
 @RestController
+@Slf4j
 @RequestMapping("/films")
 public class FilmController {
-    // храним данные в памяти приложения:
-    private final Map<Long, Film> films = new HashMap<>();
-    private Long currentFilmIdNumber = 0L;
+    private final FilmService filmService;
 
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
-    // добавление фильма:
+    // добавление Film:
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        if (films.containsKey(film.getId())) {
-            log.debug("{}: " + FILM_ALREADY_EXIST_MESSAGE + film.getName(),
-                    AlreadyExistException.class.getSimpleName());
-            throw new AlreadyExistException(FILM_ALREADY_EXIST_MESSAGE + film.getName());
-        }
-        if (film.getId() != null) {
-            log.debug("{}: " + ILLEGAL_FILM_ID_MESSAGE + film.getId(),
-                    IllegalIdException.class.getSimpleName());
-            throw new IllegalIdException(ILLEGAL_FILM_ID_MESSAGE + film.getId());
-        }
-        film.setId(generateId());
-        log.debug("Добавлен новый фильм: " + film.getName() + ", с id = " + film.getId());
-        films.put(film.getId(), film);
-
-        return film;
+        return filmService.addFilm(film);
     }
 
-    // обновление фильма:
+    // обновление Film:
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-            log.debug("Обновлена информация о фильме: " + film.getName() + ", с id = " + film.getId());
-        } else if (film.getId() == null) {
-            film.setId(generateId());
-            films.put(film.getId(), film);
-            log.debug("Добавлен новый фильм: " + film.getName() + ", с id = " + film.getId());
-        } else {
-            log.debug("{}: " + ILLEGAL_FILM_ID_MESSAGE + film.getId(),
-                    IllegalIdException.class.getSimpleName());
-            throw new IllegalIdException(ILLEGAL_FILM_ID_MESSAGE + film.getId());
-        }
-
-        return film;
+        return filmService.updateFilm(film);
     }
 
-    // получение всех фильмов:
+    // получение списка всех Film:
     @GetMapping
     public List<Film> getAllFilms() {
-        return new ArrayList<>(films.values());
+        return filmService.getAllFilms();
     }
 
-    // генератор id:
-    private Long generateId() {
-        return ++currentFilmIdNumber;
+    // получение Film по id:
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable Long id) {
+        checkId(id, PATH_VARIABLE_ID);
+        return filmService.getFilmById(id);
     }
 
-    // вспомогательный метод (получить фильм по id):
-    public Film getFilmById(Long filmId) {
-        if (films.get(filmId) == null) {
-            log.debug("Нет Film с таким id = " + filmId);
-            return null;
+    // User ставит лайк фильму:
+    @PutMapping("/{id}/like/{userId}")
+    public String addLikeToFilm(@PathVariable Long id, @PathVariable Long userId) {
+        checkId(id, PATH_VARIABLE_ID);
+        checkId(userId, PATH_VARIABLE_USER_ID);
+
+        return filmService.addLikeToFilm(id, userId);
+    }
+
+    // User удаляет лайк:
+    @DeleteMapping("{id}/like/{userId}")
+    public String removeLikeFromFilm(@PathVariable Long id, @PathVariable Long userId) {
+        checkId(id, PATH_VARIABLE_ID);
+        checkId(userId, PATH_VARIABLE_USER_ID);
+
+        return filmService.removeLikeFromFilm(id, userId);
+    }
+
+    // получаем список топ фильмов по количеству лайков в размере {count}:
+    @GetMapping("/popular")
+    public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10", required = false) Integer count) {
+        if (count <= 0) {
+            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT + " = " + count,
+                    IncorrectRequestParameterException.class.getSimpleName());
+            throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT,
+                    REQUEST_PARAMETER_COUNT_ADVICE);
         }
 
-        return films.get(filmId);
+        return filmService.getTopFilmsForLikes(count);
+    }
+
+    // вспомогательный метод для проверки id:
+    public void checkId(Long id, String pathVariable) {
+        if (id == null || id <= 0) {
+            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id,
+                    IncorrectPathVariableException.class.getSimpleName());
+            throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
+                    PATH_VARIABLE_ID_ADVICE);
+        }
     }
 }

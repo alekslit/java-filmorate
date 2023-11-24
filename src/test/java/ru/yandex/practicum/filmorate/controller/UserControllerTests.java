@@ -7,8 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
+import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.jsontypeadapter.LocalDateAdapter;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,6 +24,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.USER_ALREADY_EXIST_MESSAGE;
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_USER_ID_MESSAGE;
+import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException.INCORRECT_PATH_VARIABLE_MESSAGE;
+import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException.PATH_VARIABLE_ID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class UserControllerTests {
@@ -37,15 +42,26 @@ public class UserControllerTests {
     private User userByValidationCheck;
     private HttpClient httpClient;
     private Integer responseStatusCode;
+    private User userForFriend;
+    private User userForCommonFriend;
 
     private void init() {
-        userController = new UserController();
+        userController = new UserController(new UserService(new InMemoryUserStorage()));
         httpClient = HttpClient.newHttpClient();
         user = User.builder()
                 .email("perelman@yandex.ru")
                 .login("perelman")
                 .name("genius")
                 .birthday(LocalDate.of(2002, 2, 2))
+                .build();
+        userForFriend = User.builder()
+                .email("test1@test.ru")
+                .login("test")
+                .name("test")
+                .birthday(LocalDate.now().minusDays(100))
+                .build();
+        userForCommonFriend = userForFriend.toBuilder()
+                .email("test2@test.ru")
                 .build();
         userByValidationCheck = User.builder()
                 .email("obman@yandex.ru")
@@ -54,6 +70,8 @@ public class UserControllerTests {
                 .birthday(LocalDate.of(1901, 1, 1))
                 .build();
         userController.addUser(user);
+        userController.addUser(userForFriend);
+        userController.addUser(userForCommonFriend);
     }
 
     @BeforeEach
@@ -66,7 +84,7 @@ public class UserControllerTests {
     void shouldAddNewUserAndGetAllUsers() {
         final List<User> usersList = userController.getAllUsers();
 
-        assertNotNull(usersList, "Список пуст, User не добавлен (shouldAddNewUserAndGetAllUsers)");
+        assertNotNull(usersList, "Список пуст, User не добавлен.");
     }
 
     // Попытка добавить новый User, который уже добавлен:
@@ -80,8 +98,8 @@ public class UserControllerTests {
                 AlreadyExistException.class,
                 () -> userController.addUser(user));
 
-        assertEquals(USER_ALREADY_EXIST_MESSAGE + user.getLogin(), exception.getMessage(), "Ошибка: "
-                + "User добавлен повторно (shouldAlreadyExistExceptionWhenNewUserWithId)");
+        assertEquals(USER_ALREADY_EXIST_MESSAGE + user.getId(), exception.getMessage(),
+                "Ошибка: User добавлен повторно.");
     }
 
     // Пробуем обновить User с существующим id:
@@ -93,8 +111,8 @@ public class UserControllerTests {
 
         userController.updateUser(user);
 
-        assertEquals(user.getName(), userController.getUserById(user.getId()).getName(), "Не "
-                + "получилось обновить User (shouldUpdateUser)");
+        assertEquals(user.getName(), userController.getUserById(user.getId()).getName(),
+                "Не получилось обновить User");
     }
 
     // Пробуем обновить User c некорректным id:
@@ -108,14 +126,64 @@ public class UserControllerTests {
                 IllegalIdException.class,
                 () -> userController.updateUser(userByValidationCheck));
 
-        assertEquals(ILLEGAL_USER_ID_MESSAGE + userByValidationCheck.getId(), exception.getMessage(), "Обновили "
-                + "User с некорректным id (shouldGetIllegalExceptionWhenUserIdIs777)");
+        assertEquals(ILLEGAL_USER_ID_MESSAGE + userByValidationCheck.getId(), exception.getMessage(),
+                "Обновили User с некорректным id");
+    }
+
+    // Проверяем получение User по id:
+    @Test
+    void shouldGetUserById() {
+        final User userById = userController.getUserById(1L);
+
+        assertEquals(user, userById, "Ошибка: получен некорректный объект User.");
+    }
+
+    // Проверяем получение User по id, которого не существует:
+    @Test
+    void shouldGetIllegalIdExceptionWhenGetUserWithIdIs777() {
+        final IllegalIdException exception = assertThrows(
+                IllegalIdException.class,
+                () -> userController.getUserById(777L));
+
+        assertEquals(ILLEGAL_USER_ID_MESSAGE + 777, exception.getMessage(),
+                "Ошибка: смогли получить User по несуществующему id.");
+    }
+
+    // Проверяем функцию добавления в друзья для объекта User (добавляем в друзья -> получаем список друзей ->
+    // -> получаем список общих -> удаляем из друзей):
+    @Test
+    void testFriendsFunction() {
+        userController.addUserToFriends(user.getId(), userForFriend.getId());
+        userController.addUserToFriends(user.getId(), userForCommonFriend.getId());
+        userController.addUserToFriends(userForFriend.getId(), userForCommonFriend.getId());
+
+        assertEquals(2, user.getFriends().size(), "Ошибка функции добавления в друзья.");
+        assertEquals(2, userController.getAllFriendsList(user.getId()).size(),
+                "Ошибка функции получения списка друзей.");
+        assertEquals(1, userController.getCommonFriends(user.getId(), userForFriend.getId()).size(),
+                "Ошибка функции получения списка общих друзей.");
+
+        userController.removeUserFromFriends(user.getId(), userForFriend.getId());
+
+        assertEquals(1, user.getFriends().size(),
+                "Ошибка функции удаления из друзей.");
+    }
+
+    // Проверяем получение User по отрицательному id:
+    @Test
+    void shouldGetIncorrectPathVariableExceptionWhenUSerIdIsNegative() {
+        final IncorrectPathVariableException exception = assertThrows(
+                IncorrectPathVariableException.class,
+                () -> userController.getUserById(-1L));
+
+        assertEquals(INCORRECT_PATH_VARIABLE_MESSAGE + PATH_VARIABLE_ID,
+                exception.getMessage(), "Ошибка: метод работает с отрицательным id.");
     }
 
     /*---Тесты валидации объекта User---*/
     // email без @:
     @Test
-    void shouldNot200StatusCodeWhenUserEmailWithoutAt() throws IOException, InterruptedException {
+    void shouldGet400StatusCodeWhenUserEmailWithoutAt() throws IOException, InterruptedException {
         userByValidationCheck = userByValidationCheck.toBuilder()
                 .email("withoutsobakayandex.ru")
                 .build();
@@ -127,12 +195,12 @@ public class UserControllerTests {
 
         responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
-        assertNotEquals(200, responseStatusCode, "Ошибка валидации при User.email без '@'");
+        assertEquals(400, responseStatusCode, "Ошибка валидации при User.email без '@'");
     }
 
     // login с пробелами:
     @Test
-    void shouldNot200StatusCodeWhenUserLoginWithBlankSpace() throws IOException, InterruptedException {
+    void shouldGet400StatusCodeWhenUserLoginWithBlankSpace() throws IOException, InterruptedException {
         userByValidationCheck = userByValidationCheck.toBuilder()
                 .login("n e g o d n i k")
                 .build();
@@ -144,7 +212,7 @@ public class UserControllerTests {
 
         responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
-        assertNotEquals(200, responseStatusCode, "Ошибка валидации при User.login c пробелами");
+        assertEquals(400, responseStatusCode, "Ошибка валидации при User.login c пробелами");
     }
 
     // name = null:
@@ -154,7 +222,7 @@ public class UserControllerTests {
                 .name(null)
                 .build();
 
-        final User newUser = userController.checkName(userByValidationCheck);
+        final User newUser = userController.addUser(userByValidationCheck);
 
         assertEquals(userByValidationCheck.getLogin(), newUser.getName(), "Ошибка проверки "
                 + "имени при User.name = null");
@@ -162,7 +230,7 @@ public class UserControllerTests {
 
     // User.birthday = текущая_дата + 1:
     @Test
-    void shouldNot200StatusCodeWhenUserBirthdayIsFutureDay() throws IOException, InterruptedException {
+    void shouldGet400StatusCodeWhenUserBirthdayIsFutureDay() throws IOException, InterruptedException {
         final LocalDate futureDay = LocalDate.now().plusDays(1);
         userByValidationCheck = userByValidationCheck.toBuilder()
                 .birthday(futureDay)
@@ -175,7 +243,7 @@ public class UserControllerTests {
 
         responseStatusCode = httpClient.send(httpRequest, handler).statusCode();
 
-        assertNotEquals(200, responseStatusCode, "Ошибка валидации при "
+        assertEquals(400, responseStatusCode, "Ошибка валидации при "
                 + "User.birthday = текущая_дата + 1");
     }
 }
