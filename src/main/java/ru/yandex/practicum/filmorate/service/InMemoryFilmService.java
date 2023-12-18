@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Qualifier("InMemoryFilmService")
-public class InMemoryFilmService implements FilmService{
+public class InMemoryFilmService implements FilmService {
     private final InMemoryFilmStorage filmStorage;
     private final InMemoryUserStorage userStorage;
 
     @Autowired
-    public InMemoryFilmService( InMemoryFilmStorage filmStorage, InMemoryUserStorage userStorage) {
+    public InMemoryFilmService(InMemoryFilmStorage filmStorage, InMemoryUserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
