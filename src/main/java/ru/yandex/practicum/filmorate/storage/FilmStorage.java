@@ -11,7 +11,5 @@ public interface FilmStorage {
 
     List<Film> getAllFilms();
 
-    Long generateId();
-
     Film getFilmById(Long filmId);
 }

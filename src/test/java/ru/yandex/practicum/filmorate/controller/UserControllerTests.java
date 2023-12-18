@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.jsontypeadapter.LocalDateAdapter;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.InMemoryUserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class UserControllerTests {
     private User userForCommonFriend;
 
     private void init() {
-        userController = new UserController(new UserService(new InMemoryUserStorage()));
+        userController = new UserController(new InMemoryUserService(new InMemoryUserStorage()));
         httpClient = HttpClient.newHttpClient();
         user = User.builder()
                 .email("perelman@yandex.ru")

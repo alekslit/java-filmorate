@@ -12,10 +12,9 @@ import ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterExceptio
 import ru.yandex.practicum.filmorate.jsontypeadapter.LocalDateAdapter;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.InMemoryFilmService;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -49,7 +48,7 @@ public class FilmControllerTests {
     private HttpClient httpClient;
     private Integer responseStatusCode;
     private User userForLike;
-    private UserStorage userStorage;
+    private InMemoryUserStorage userStorage;
 
 
     private void init() {
@@ -60,7 +59,7 @@ public class FilmControllerTests {
                 .birthday(LocalDate.of(2002, 2, 2))
                 .build();
         userStorage = new InMemoryUserStorage();
-        filmController = new FilmController(new FilmService(new InMemoryFilmStorage(), userStorage));
+        filmController = new FilmController(new InMemoryFilmService(new InMemoryFilmStorage(), userStorage));
         httpClient = HttpClient.newHttpClient();
         film = Film.builder()
                 .name("Аватар")

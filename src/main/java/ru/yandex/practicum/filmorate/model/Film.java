@@ -9,6 +9,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -35,6 +36,15 @@ public class Film {
     // продолжительность в минутах:
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
     private Integer duration;
+
+    // оценка пользователей(количество лайков):
+    private Integer rate;
+
+    // MPA-рейтинг фильма:
+    private Mpa mpa;
+
+    // жанры фильма:
+    private List<Genre> genres;
 
     public Integer getAmountOfLikes() {
         return likes.size();

@@ -11,8 +11,6 @@ public interface UserStorage {
 
     List<User> getAllUsers();
 
-    Long generateId();
-
     User checkName(User user);
 
     User getUserById(Long userId);

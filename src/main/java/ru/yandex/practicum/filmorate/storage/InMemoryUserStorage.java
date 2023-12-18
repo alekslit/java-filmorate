@@ -67,7 +67,6 @@ public class InMemoryUserStorage implements UserStorage {
         return new ArrayList<>(users.values());
     }
 
-    @Override
     // генератор id:
     public Long generateId() {
         return ++currentUserIdNumber;
