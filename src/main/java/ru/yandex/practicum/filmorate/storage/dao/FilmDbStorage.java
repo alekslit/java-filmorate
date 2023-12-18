@@ -39,7 +39,7 @@ public class FilmDbStorage implements FilmStorage {
     /*---Добавляем фильм в БД---*/
     @Override
     public Film addFilm(Film film) {
-        if(film.getId() == null) {
+        if (film.getId() == null) {
             // убираем дубликаты жанров:
             if (film.getGenres() != null) {
                 sortedSet.clear();
