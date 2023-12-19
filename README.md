@@ -76,22 +76,27 @@ LIMIT 10;
 ```
 6. Получаем список друзей пользователя (например пользователя с id = 1):
 ```
-SELECT *
-FROM users
-WHERE user_id IN (SELECT friend_id
-                  FROM user_friendship
-                  WHERE user_id = 1);
+SELECT u.user_id,
+       u.email,
+       u.login,
+       u.name,
+       u.birthday
+FROM users AS u
+JOIN user_friendship AS uf ON (u.user_id = uf.friend_id)
+WHERE uf.user_id = 1;
 ```
 7. Получаем список общих друзей двух пользователей (id пользователей 1 и 2):
 ```
-SELECT *
-FROM users
-WHERE user_id IN (SELECT friend_id
-                  FROM user_friendship
-                  WHERE user_id = 1
-                    AND friend_id IN (SELECT friend_id
-                                      FROM user_friendship
-                                      WHERE user_id = 2));
+SELECT u.user_id,
+       u.email,
+       u.login,
+       u.name,
+       u.birthday
+FROM users AS u
+JOIN user_friendship AS uf1 ON (u.user_id = uf1.friend_id)
+JOIN user_friendship AS uf2 ON (uf1.friend_id = uf2.friend_id)
+WHERE uf1.user_id = 1
+  AND uf2.user_id = 2;
 ```
 8. Получение жанра фильма по id (в примере ищем жанр с id = 1):
 ```

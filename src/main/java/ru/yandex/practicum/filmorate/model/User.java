@@ -9,17 +9,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @Builder(toBuilder = true)
 public class User {
     // идентификатор пользователя:
     private Long id;
-
-    // id друзей пользователя:
-    private final Set<Long> friends = new HashSet<>();
 
     // электронная почта:
     @NotNull(message = "Адрес электронной почты не может быть пустым")

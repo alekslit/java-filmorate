@@ -8,18 +8,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder(toBuilder = true)
 public class Film {
     // идентификатор фильма:
     private Long id;
-
-    // лайки от пользователей:
-    private final Set<Long> likes = new HashSet<>();
 
     // название:
     @NotBlank(message = "Название фильма не может быть пустым")
@@ -45,8 +40,4 @@ public class Film {
 
     // жанры фильма:
     private List<Genre> genres;
-
-    public Integer getAmountOfLikes() {
-        return likes.size();
-    }
 }

@@ -77,12 +77,12 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleInvalidDataBaseQuery(final InvalidDataBaseQuery e) {
+    public ErrorResponse handleInvalidDataBaseQueryException(final InvalidDataBaseQueryException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error(e.getMessage())
                 .adviceToUser(e.getAdviceToUser())
                 .build();
-        log.debug("{}: " + e.getMessage(), InvalidDataBaseQuery.class.getSimpleName());
+        log.debug("{}: " + e.getMessage(), InvalidDataBaseQueryException.class.getSimpleName());
 
         return errorResponse;
     }

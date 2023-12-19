@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.dao;
+package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +8,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
-import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQuery;
+import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,8 +19,8 @@ import java.util.Map;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.USER_ALREADY_EXIST_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.USER_ALREADY_EXIST_MESSAGE;
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.*;
-import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQuery.INVALID_DATA_BASE_QUERY_MESSAGE;
-import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQuery.USER_INVALID_DATA_BASE_QUERY_ADVICE;
+import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.INVALID_DATA_BASE_QUERY_MESSAGE;
+import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.USER_INVALID_DATA_BASE_QUERY_ADVICE;
 import static ru.yandex.practicum.filmorate.query.SqlQuery.*;
 
 @Repository
@@ -107,7 +106,7 @@ public class UserDbStorage implements UserStorage {
         } catch (EmptyResultDataAccessException exception) {
             log.debug("{}: " + INVALID_DATA_BASE_QUERY_MESSAGE + " Размер ответа на запрос: "
                     + exception.getExpectedSize(), IllegalIdException.class.getSimpleName());
-            throw new InvalidDataBaseQuery(INVALID_DATA_BASE_QUERY_MESSAGE,
+            throw new InvalidDataBaseQueryException(INVALID_DATA_BASE_QUERY_MESSAGE,
                     exception.getExpectedSize(),
                     USER_INVALID_DATA_BASE_QUERY_ADVICE);
         }

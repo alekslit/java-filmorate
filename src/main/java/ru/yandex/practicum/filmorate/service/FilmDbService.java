@@ -1,16 +1,13 @@
-package ru.yandex.practicum.filmorate.service.dao;
+package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.dao.FilmDbStorage;
 
 import java.util.List;
 
 @Service
-@Qualifier("FilmDbService")
 public class FilmDbService implements FilmService {
     private final FilmDbStorage filmStorage;
 

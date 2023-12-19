@@ -103,29 +103,26 @@ public class SqlQuery {
               "AND friend_id = ?;";
 
     public static final String SQL_QUERY_GET_ALL_FRIEND_LIST =
-            "SELECT user_id, " +
-                   "email, " +
-                   "login, " +
-                   "name, " +
-                   "birthday " +
-            "FROM users " +
-            "WHERE user_id IN (SELECT friend_id " +
-                              "FROM user_friendship " +
-                              "WHERE user_id = ?);";
+            "SELECT u.user_id, " +
+                   "u.email, " +
+                   "u.login, " +
+                   "u.name, " +
+                   "u.birthday " +
+            "FROM users AS u " +
+            "JOIN user_friendship AS uf ON (u.user_id = uf.friend_id) " +
+            "WHERE uf.user_id = ?;";
 
     public static final String SQL_QUERY_GET_COMMON_FRIENDS =
-            "SELECT user_id, " +
-                   "email, " +
-                   "login, " +
-                   "name, " +
-                   "birthday " +
-            "FROM users " +
-            "WHERE user_id IN (SELECT friend_id " +
-                                "FROM user_friendship " +
-                                "WHERE user_id = ? " +
-                                  "AND friend_id IN (SELECT friend_id " +
-                                                    "FROM user_friendship " +
-                                                    "WHERE user_id = ?));";
+            "SELECT u.user_id, " +
+                   "u.email, " +
+                   "u.login, " +
+                   "u.name, " +
+                   "u.birthday " +
+            "FROM users AS u " +
+            "JOIN user_friendship AS uf1 ON (u.user_id = uf1.friend_id) " +
+            "JOIN user_friendship AS uf2 ON (uf1.friend_id = uf2.friend_id) " +
+            "WHERE uf1.user_id = ? " +
+              "AND uf2.user_id = ?;";
 
     /*----Запросы для объектов Genre----*/
     public static final String SQL_QUERY_GET_GENRE_BY_ID =
