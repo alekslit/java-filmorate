@@ -6,10 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.IllegalIdException;
-import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
-import ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException;
+import ru.yandex.practicum.filmorate.exception.*;
+import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
 @RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
 @Slf4j
@@ -73,6 +71,18 @@ public class ErrorHandler {
                 .adviceToUser(e.getAdviceToUser())
                 .build();
         log.debug("{}: " + e.getMessage(), IncorrectPathVariableException.class.getSimpleName());
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleInvalidDataBaseQueryException(final InvalidDataBaseQueryException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error(e.getMessage())
+                .adviceToUser(e.getAdviceToUser())
+                .build();
+        log.debug("{}: " + e.getMessage(), InvalidDataBaseQueryException.class.getSimpleName());
 
         return errorResponse;
     }
