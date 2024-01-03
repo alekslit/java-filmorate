@@ -55,7 +55,7 @@ public class FilmDbStorage implements FilmStorage {
 
             // связали id фильма и жанры:
             if (film.getGenres() != null) {
-                for (Genre genre: film.getGenres()) {
+                for (Genre genre : film.getGenres()) {
                     SimpleJdbcInsert insertFilmGenre = new SimpleJdbcInsert(jdbcTemplate)
                             .withTableName("film_genres")
                             .usingGeneratedKeyColumns("film_genres_id");
@@ -81,11 +81,11 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         if (getFilmById(film.getId()) != null) {
             // убираем дубликаты жанров:
-                if (film.getGenres() != null) {
-                    sortedSet.clear();
-                    sortedSet.addAll(film.getGenres());
-                    film.setGenres(List.copyOf(sortedSet));
-                }
+            if (film.getGenres() != null) {
+                sortedSet.clear();
+                sortedSet.addAll(film.getGenres());
+                film.setGenres(List.copyOf(sortedSet));
+            }
 
             // обновили фильм:
             String filmSqlQuery = SQL_QUERY_UPDATE_FILM;
@@ -100,10 +100,10 @@ public class FilmDbStorage implements FilmStorage {
 
             // обновили жанры:
             String filmGenreDeleteSqlQuery = "DELETE FROM film_genres " +
-                                             "WHERE film_id = ?;";
+                    "WHERE film_id = ?;";
             jdbcTemplate.update(filmGenreDeleteSqlQuery, film.getId());
             if (film.getGenres() != null) {
-               for (Genre genre: film.getGenres()) {
+                for (Genre genre : film.getGenres()) {
                     SimpleJdbcInsert insertFilmGenre = new SimpleJdbcInsert(jdbcTemplate)
                             .withTableName("film_genres")
                             .usingGeneratedKeyColumns("film_genres_id");
@@ -135,7 +135,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilmById(Long filmId) {
         try {
             String sqlQuery = SQL_QUERY_GET_FILM_BY_ID;
-            List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm,filmId);
+            List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, filmId);
 
             if (films.size() == 0) {
                 log.debug("{}: " + ILLEGAL_FILM_ID_MESSAGE + filmId,
@@ -144,7 +144,7 @@ public class FilmDbStorage implements FilmStorage {
             }
 
             List<Genre> genres = new ArrayList<>();
-            for (Film film: films) {
+            for (Film film : films) {
                 genres.addAll(film.getGenres());
             }
             Film film = films.get(0);
@@ -222,7 +222,7 @@ public class FilmDbStorage implements FilmStorage {
                     "description", film.getDescription(),
                     "release_date", film.getReleaseDate(),
                     "duration", film.getDuration(),
-                    "mpa_rating_id",film.getMpa().getId());
+                    "mpa_rating_id", film.getMpa().getId());
         }
 
         return Map.of(
@@ -235,10 +235,10 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private static Map<String, Object> filmLikeToMap(Long id, Long userId) {
-            return Map.of(
-                    "film_id", id,
-                    "user_id", userId
-            );
+        return Map.of(
+                "film_id", id,
+                "user_id", userId
+        );
     }
 
     private static Map<String, Object> filmGenreToMap(Film film, Genre genre) {
