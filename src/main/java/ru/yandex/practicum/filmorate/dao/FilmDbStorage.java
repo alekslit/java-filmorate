@@ -194,6 +194,26 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
     }
 
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return jdbcTemplate.query(SQL_QUERY_GET_COMMON_FILMS, this::mapRowToFilm, userId, friendId);
+    }
+
+//    public List<Film> getCommonFilms(Long userId, Long friendId) {
+//        List<Film> commonFilms = getLikedFilms(userId);
+//        List<Film> friendFilms = getLikedFilms(friendId);
+//        commonFilms.retainAll(friendFilms);
+//        return commonFilms;
+//    }
+//
+//    public List<Film> getLikedFilms(Long userId) {
+//        String sqlQuery = "SELECT * FROM films AS f " +
+//                "INNER JOIN film_likes AS fl ON f.film_id = fl.film_likes_id " +
+//                "INNER JOIN mpa AS m ON f.mpa_rating_id = m.mpa_rating_id " +
+//                "WHERE fl.user_id = ? " +
+//                "ORDER BY f.rate DESC";
+//        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId);
+//    }
+
     /*------Вспомогательные методы------*/
     private static Map<String, Object> filmToMap(Film film) {
         if (film.getRate() == null) {
@@ -217,8 +237,8 @@ public class FilmDbStorage implements FilmStorage {
     private static Map<String, Object> filmLikeToMap(Long id, Long userId) {
             return Map.of(
                     "film_id", id,
-                    "user_id", userId);
-
+                    "user_id", userId
+            );
     }
 
     private static Map<String, Object> filmGenreToMap(Film film, Genre genre) {

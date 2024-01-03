@@ -124,6 +124,27 @@ public class SqlQuery {
             "WHERE uf1.user_id = ? " +
               "AND uf2.user_id = ?;";
 
+    //возвращаем все фильмы, которые понравились обоим пользователям
+    public static final String SQL_QUERY_GET_COMMON_FILMS =
+            "SELECT fl.film_id, " +
+                    "f.name, " +
+                    "f.description, " +
+                    "f.release_date, " +
+                    "f.duration, " +
+                    "f.rate, " +
+                    "mr.mpa_rating_id, " +
+                    "mr.name AS mpa_name, " +
+                    "g.genre_id, " +
+                    "g.name AS genre_name " +
+            "FROM film_likes AS fl " +
+            "LEFT OUTER JOIN films AS f ON (fl.film_id = f.film_id) " +
+            "LEFT OUTER JOIN mpa_rating AS mr ON (f.mpa_rating_id = mr.mpa_rating_id) " +
+            "LEFT OUTER JOIN film_genres AS fg ON (f.film_id = fg.film_id) " +
+            "LEFT OUTER JOIN genre AS g ON (fg.genre_id = g.genre_id) " +
+            "WHERE fl.user_id = ? OR fl.user_id = ? " +
+            "GROUP BY fl.film_id HAVING COUNT(*) = 2" +
+            "ORDER BY f.rate DESC;";
+
     /*----Запросы для объектов Genre----*/
     public static final String SQL_QUERY_GET_GENRE_BY_ID =
             "SELECT * " +

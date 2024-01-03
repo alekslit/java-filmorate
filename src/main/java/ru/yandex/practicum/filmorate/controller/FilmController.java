@@ -82,6 +82,14 @@ public class FilmController {
         return filmService.getTopFilmsForLikes(count);
     }
 
+    //получаем список общих фильмов с сортировкой по количеству лайков
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam("userId") Long userId, @RequestParam("friendId") Long friendId) {
+        checkId(userId, PATH_VARIABLE_USER_ID);
+        checkId(friendId, PATH_VARIABLE_FRIEND_ID);
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {
         if (id == null || id <= 0) {

@@ -18,4 +18,6 @@ public interface FilmService {
     String removeLikeFromFilm(Long id, Long userId);
 
     List<Film> getTopFilmsForLikes(Integer count);
+
+    List<Film> getCommonFilms(Long userId, Long friendId);
 }

@@ -51,4 +51,8 @@ public class FilmDbService implements FilmService {
         return filmStorage.getTopFilmsForLikes(count);
     }
 
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
 }
