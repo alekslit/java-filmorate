@@ -43,7 +43,6 @@ public class FilmDbStorage implements FilmStorage {
                     .usingGeneratedKeyColumns("film_id");
             Long filmId = insertFilm.executeAndReturnKey(filmToMap(film)).longValue();
             film.setId(filmId);
-            // связали id фильма и жанры:
             if (film.getGenres() != null) {
                 saveGenres(film);
                 sortGenres(film);
