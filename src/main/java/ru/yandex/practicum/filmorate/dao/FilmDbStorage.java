@@ -28,7 +28,6 @@ import static ru.yandex.practicum.filmorate.query.SqlQuery.*;
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private Set<Genre> sortedSet = new TreeSet(Comparator.comparing(Genre::getId));
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
