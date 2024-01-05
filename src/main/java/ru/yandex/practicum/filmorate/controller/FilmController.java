@@ -51,6 +51,13 @@ public class FilmController {
         return filmService.getFilmById(id);
     }
 
+    @DeleteMapping("/{id}")
+    public String deleteFilmById(@PathVariable Long id) {
+        checkId(id, PATH_VARIABLE_ID);
+        filmService.deleteFilmById(id);
+        return String.format("фильм с id %d удален", id);
+    }
+
     // User ставит лайк фильму:
     @PutMapping("/{id}/like/{userId}")
     public String addLikeToFilm(@PathVariable Long id, @PathVariable Long userId) {
@@ -80,6 +87,13 @@ public class FilmController {
         }
 
         return filmService.getTopFilmsForLikes(count);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam("userId") Long userId, @RequestParam("friendId") Long friendId) {
+        checkId(userId, PATH_VARIABLE_USER_ID);
+        checkId(friendId, PATH_VARIABLE_FRIEND_ID);
+        return filmService.getCommonFilms(userId, friendId);
     }
 
     // вспомогательный метод для проверки id:

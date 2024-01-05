@@ -13,6 +13,8 @@ public interface UserService {
 
     User getUserById(Long id);
 
+    void deleteUserById(Long id);
+
     String addUserToFriends(Long id, Long friendId);
 
     String removeUserFromFriends(Long id, Long friendId);

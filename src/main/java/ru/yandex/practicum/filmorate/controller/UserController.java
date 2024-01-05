@@ -49,6 +49,14 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    //удаление пользователя по id
+    @DeleteMapping("/{id}")
+    public String deleteUserById(@PathVariable Long id) {
+        checkId(id, PATH_VARIABLE_ID);
+        userService.deleteUserById(id);
+        return String.format("фильм с id %d удален", id);
+    }
+
     // добавление User в друзья:
     @PutMapping("/{id}/friends/{friendId}")
     public String addUserToFriends(@PathVariable Long id, @PathVariable Long friendId) {

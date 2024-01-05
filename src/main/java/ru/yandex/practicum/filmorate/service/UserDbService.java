@@ -37,6 +37,11 @@ public class UserDbService implements UserService {
     }
 
     @Override
+    public void deleteUserById(Long id) {
+        userStorage.deleteUserById(id);
+    }
+
+    @Override
     public String addUserToFriends(Long id, Long friendId) {
         return userStorage.addUserToFriends(id, friendId);
     }

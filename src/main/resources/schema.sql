@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS films(
     description varchar(200),
     release_date date CONSTRAINT date_constr CHECK (release_date >= '1895-12-28'),
     duration integer CONSTRAINT duration_constr CHECK (duration > 0),
-    rate integer,
     mpa_rating_id INTEGER REFERENCES mpa_rating (mpa_rating_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
