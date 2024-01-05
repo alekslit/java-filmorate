@@ -3,7 +3,10 @@ package ru.yandex.practicum.filmorate.exception;
 public class IllegalIdException extends RuntimeException {
     /*---для обновления и получения уже существующих объектов---*/
     public static final String ILLEGAL_USER_ID_MESSAGE = "Пользователя с таким id не существует. id = ";
+    public static final String ILLEGAL_COMMON_USER_ID_MESSAGE = "Неверно указан id пользователя";
     public static final String ILLEGAL_FILM_ID_MESSAGE = "Фильма с таким id не существует. id = ";
+    public static final String ILLEGAL_COMMON_ILM_ID_MESSAGE = "Неверно указан id фильма";
+
     public static final String ILLEGAL_FILM_ID_ADVICE = "Проверьте значение переданного id фильма.";
     public static final String ILLEGAL_USER_ID_ADVICE = "Проверьте значение переданного id пользователя.";
 

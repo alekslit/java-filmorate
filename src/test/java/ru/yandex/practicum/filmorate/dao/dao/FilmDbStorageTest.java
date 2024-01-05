@@ -16,7 +16,9 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,12 +44,11 @@ public class FilmDbStorageTest {
                 .description("test_film1_description")
                 .releaseDate(LocalDate.of(1977, 7, 7))
                 .duration(120)
-                .rate(5)
                 .mpa(Mpa.builder()
                         .id(1)
                         .name("G")
                         .build())
-                .genres(List.of(Genre.builder()
+                .genres(Set.of(Genre.builder()
                         .id(1)
                         .name("Комедия")
                         .build()))
@@ -63,7 +64,6 @@ public class FilmDbStorageTest {
                 .description("test2")
                 .releaseDate(LocalDate.of(2001, 1, 1))
                 .duration(100)
-                .rate(4)
                 .mpa(Mpa.builder()
                         .id(1)
                         .build())
@@ -111,24 +111,69 @@ public class FilmDbStorageTest {
     // проверяем функцию добавления лайка:
     @Test
     public void testAddLikeToFilm() {
-        userStorage.addUser(userForLike);
+        Set<Genre> genresForTest = new HashSet<>();
+        genresForTest.add(new Genre(1, "Комедия"));
+        Film film = Film.builder()
+                .id(1L)
+                .name("name")
+                .releaseDate(LocalDate.of(1967, 03, 25))
+                .description("description")
+                .duration(100)
+                .mpa(Mpa.builder()
+                        .id(1)
+                        .name("G")
+                        .build())
+                .build();
 
-        filmStorage.addLikeToFilm(film.getId(), userForLike.getId());
 
-        assertThat(6).isEqualTo(filmStorage.getFilmById(film.getId()).getRate());
+        User user = User.builder()
+                .id(1L)
+                .email("mail@mail.ru")
+                .login("dolore")
+                .name("name")
+                .birthday(LocalDate.of(1946, 8, 20))
+                .build();
+
+        jdbcTemplate.update("INSERT INTO FILMS(film_id, name, description, RELEASE_DATE, duration, mpa_rating_id) VALUES (?,?,?,?,?,?)", film.getId(), film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId());
+        jdbcTemplate.update("INSERT INTO users(user_id, email, login, name, birthday) VALUES (?,?,?,?, ?)", user.getId(), user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
+        filmStorage.addLikeToFilm(film.getId(), user.getId());
+
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM film_likes WHERE film_id = ?", Integer.class, film.getId());
+        assertEquals(1, count);
     }
 
     // проверяем функцию удаления лайка:
     @Test
     public void testRemoveLikeFromFilm() {
-        userStorage.addUser(userForLike);
-        filmStorage.addLikeToFilm(film.getId(), userForLike.getId());
-        assertThat(6).isEqualTo(filmStorage.getFilmById(film.getId()).getRate());
+        Set<Genre> genresForTest = new HashSet<>();
+        genresForTest.add(new Genre(1, "Комедия"));
+        Film film = Film.builder()
+                .id(1L)
+                .name("name")
+                .releaseDate(LocalDate.of(1967, 03, 25))
+                .description("description")
+                .duration(100)
+                .mpa(Mpa.builder()
+                        .id(1)
+                        .name("G")
+                        .build())
+                .build();
 
-        filmStorage.removeLikeFromFilm(film.getId(), userForLike.getId());
 
+        User user = User.builder()
+                .id(1L)
+                .email("mail@mail.ru")
+                .login("dolore")
+                .name("name")
+                .birthday(LocalDate.of(1946, 8, 20))
+                .build();
 
-        assertThat(5).isEqualTo(filmStorage.getFilmById(film.getId()).getRate());
+        jdbcTemplate.update("INSERT INTO FILMS(film_id, name, description, RELEASE_DATE, duration, mpa_rating_id) VALUES (?,?,?,?,?,?)", film.getId(), film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId());
+        jdbcTemplate.update("INSERT INTO USERS(user_id, email, login, name, birthday) VALUES (?,?,?,?, ?)", user.getId(), user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
+        jdbcTemplate.update("INSERT INTO film_likes(user_id, film_id) VALUES(?, ?)", user.getId(), film.getId());
+
+        filmStorage.removeLikeFromFilm(film.getId(), user.getId());
+        assertEquals(0, jdbcTemplate.queryForObject("SELECT COUNT(*) FROM film_likes WHERE film_id = ?", Integer.class, film.getId()));
     }
 
     // проверяем функцию получения топ фильмов:

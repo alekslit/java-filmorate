@@ -37,6 +37,11 @@ public class FilmDbService implements FilmService {
     }
 
     @Override
+    public void deleteFilmById(Long id) {
+        filmStorage.deleteFilmById(id);
+    }
+
+    @Override
     public String addLikeToFilm(Long id, Long userId) {
         return filmStorage.addLikeToFilm(id, userId);
     }
@@ -51,4 +56,8 @@ public class FilmDbService implements FilmService {
         return filmStorage.getTopFilmsForLikes(count);
     }
 
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) { //todo
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
 }

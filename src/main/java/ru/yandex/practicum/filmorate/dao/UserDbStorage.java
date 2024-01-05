@@ -66,24 +66,24 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) {
         final User newUser = checkName(user);
 
-            if (getUserById(newUser.getId()) != null) {
-                String sqlQuery = SQL_QUERY_UPDATE_USER;
-                jdbcTemplate.update(sqlQuery,
-                        newUser.getEmail(),
-                        newUser.getLogin(),
-                        newUser.getName(),
-                        newUser.getBirthday(),
-                        newUser.getId());
+        if (getUserById(newUser.getId()) != null) {
+            String sqlQuery = SQL_QUERY_UPDATE_USER;
+            jdbcTemplate.update(sqlQuery,
+                    newUser.getEmail(),
+                    newUser.getLogin(),
+                    newUser.getName(),
+                    newUser.getBirthday(),
+                    newUser.getId());
 
-                log.debug("Обновлена информация о пользователе: " + newUser.getLogin() + ", с id = " + newUser.getId());
-            } else if (newUser.getId() == null) {
-                addUser(newUser);
-                log.debug("Добавлен новый пользователь: " + newUser.getLogin() + ", с id = " + newUser.getId());
-            } else {
-                log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + newUser.getId(),
-                        IllegalIdException.class.getSimpleName());
-                throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + newUser.getId(), ILLEGAL_USER_ID_ADVICE);
-            }
+            log.debug("Обновлена информация о пользователе: " + newUser.getLogin() + ", с id = " + newUser.getId());
+        } else if (newUser.getId() == null) {
+            addUser(newUser);
+            log.debug("Добавлен новый пользователь: " + newUser.getLogin() + ", с id = " + newUser.getId());
+        } else {
+            log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + newUser.getId(),
+                    IllegalIdException.class.getSimpleName());
+            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + newUser.getId(), ILLEGAL_USER_ID_ADVICE);
+        }
 
         return newUser;
     }
@@ -112,37 +112,68 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
+    /*---Удалить пользователя по id---*/
+    @Override
+    public void deleteUserById(Long userId) {
+        if (checkIfUserExists(userId)) {
+            jdbcTemplate.update(SQL_QUERY_DELETE_USER_BY_ID, userId);
+        } else {
+            log.error("Пользователь с id {} еще не добавлен.", userId);
+            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + userId, ILLEGAL_USER_ID_ADVICE);
+        }
+    }
+
     /*---Добавляем User в друзья---*/
     public String addUserToFriends(Long id, Long friendId) {
-        SimpleJdbcInsert insertFriend = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("user_friendship")
-                .usingGeneratedKeyColumns("user_friendship_id");
-        insertFriend.execute(userFriendsipToMap(id, friendId));
+        if (checkIfUserExists(id) && checkIfUserExists(friendId)) {
+            SimpleJdbcInsert insertFriend = new SimpleJdbcInsert(jdbcTemplate)
+                    .withTableName("user_friendship")
+                    .usingGeneratedKeyColumns("user_friendship_id");
+            insertFriend.execute(userFriendsipToMap(id, friendId));
 
-        return ADD_TO_FRIEND_MESSAGE + id + ", " + friendId;
+            return ADD_TO_FRIEND_MESSAGE + id + ", " + friendId;
+        } else {
+            log.error("Неверно указаны id пользователей для добавления в друзья {}, {}", id, friendId);
+            throw new IllegalIdException(ILLEGAL_COMMON_USER_ID_MESSAGE, ILLEGAL_USER_ID_ADVICE);
+        }
     }
 
     /*---Удаляем User из друзей---*/
     public String removeUserFromFriends(Long id, Long friendId) {
-        String sqlQuery = SQL_QUERY_REMOVE_USER_FROM_FRIENDS;
-        jdbcTemplate.update(sqlQuery, id, friendId);
-
-        return REMOVE_FROM_FRIEND_MESSAGE + id + ", " + friendId;
+        if (checkIfUserExists(id) && checkIfUserExists(friendId)) {
+            String sqlQuery = SQL_QUERY_REMOVE_USER_FROM_FRIENDS;
+            jdbcTemplate.update(sqlQuery, id, friendId);
+            return REMOVE_FROM_FRIEND_MESSAGE + id + ", " + friendId;
+        } else {
+            log.error("Неверно указаны id пользователей для удаления из друзей {}, {}", id, friendId);
+            throw new IllegalIdException(ILLEGAL_COMMON_USER_ID_MESSAGE, ILLEGAL_USER_ID_ADVICE);
+        }
     }
 
     /*---Получить список друзей User---*/
+
     public List<User> getAllFriendsList(Long id) {
-        String sqlQuery = SQL_QUERY_GET_ALL_FRIEND_LIST;
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id);
+        if (checkIfUserExists(id)) {
+            String sqlQuery = SQL_QUERY_GET_ALL_FRIEND_LIST;
+            return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id);
+        } else {
+            log.error("Пользователь с id {} еще не добавлен.", id);
+            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + id, ILLEGAL_USER_ID_ADVICE);
+        }
     }
-
     /*---Получить список общих друзей для двух User---*/
-    public List<User> getCommonFriends(Long id, Long otherId) {
-        String sqlQuery = SQL_QUERY_GET_COMMON_FRIENDS;
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id, otherId);
-    }
 
+    public List<User> getCommonFriends(Long id, Long otherId) {
+        if (checkIfUserExists(id) && checkIfUserExists(otherId)) {
+            String sqlQuery = SQL_QUERY_GET_COMMON_FRIENDS;
+            return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id, otherId);
+        } else {
+            log.error("Неверно указаны id пользователей для отображения общих друзей {}, {}", id, otherId);
+            throw new IllegalIdException(ILLEGAL_COMMON_USER_ID_MESSAGE, ILLEGAL_USER_ID_ADVICE);
+        }
+    }
     /*-----Вспомогательные методы-----*/
+
     private static Map<String, Object> userToMap(User user) {
         return Map.of(
                 "email", user.getEmail(),
@@ -179,5 +210,14 @@ public class UserDbStorage implements UserStorage {
         }
 
         return user;
+    }
+
+    private boolean checkIfUserExists(Long id) {
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS WHERE user_id = ?", Integer.class, id);
+        if (result == 0) {
+            log.error("Пользователя с таким id {} нет", id);
+            return false;
+        }
+        return true;
     }
 }

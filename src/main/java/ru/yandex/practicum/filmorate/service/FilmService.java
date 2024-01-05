@@ -13,9 +13,14 @@ public interface FilmService {
 
     Film getFilmById(Long id);
 
+    void deleteFilmById(Long id);
+
     String addLikeToFilm(Long id, Long userId);
 
     String removeLikeFromFilm(Long id, Long userId);
 
     List<Film> getTopFilmsForLikes(Integer count);
+
+    List<Film> getCommonFilms(Long userId, Long friendId); //todo
+
 }
