@@ -80,10 +80,8 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10", required = false) Integer count) {
         if (count <= 0) {
-            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT + " = " + count,
-                    IncorrectRequestParameterException.class.getSimpleName());
-            throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT,
-                    REQUEST_PARAMETER_COUNT_ADVICE);
+            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT + " = " + count, IncorrectRequestParameterException.class.getSimpleName());
+            throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT, REQUEST_PARAMETER_COUNT_ADVICE);
         }
 
         return filmService.getTopFilmsForLikes(count);
@@ -101,13 +99,12 @@ public class FilmController {
         boolean sortByLikes = "likes".equalsIgnoreCase(sortBy);
         return filmService.getFilmsByDirectorSortedByLikesOrYear(directorId, sortByLikes);
     }
+
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {
         if (id == null || id <= 0) {
-            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id,
-                    IncorrectPathVariableException.class.getSimpleName());
-            throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
-                    PATH_VARIABLE_ID_ADVICE);
+            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id, IncorrectPathVariableException.class.getSimpleName());
+            throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable, PATH_VARIABLE_ID_ADVICE);
         }
     }
 }
