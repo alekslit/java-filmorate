@@ -116,7 +116,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilmsByDirectorSortedByLikesOrYear(Long directorId, boolean sortByLikes) {
-        if(checkIfDirectorExists(directorId)){
+        if (checkIfDirectorExists(directorId)) {
             String orderByClause = sortByLikes ? "ORDER BY COUNT(fl.film_likes_id) ASC;" : "ORDER BY f.release_date ASC;";
             List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS_BY_DIRECTOR
                     + orderByClause, getFilmMapper(), directorId);
@@ -195,6 +195,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         return true;
     }
+
     private boolean checkIfDirectorExists(Long id) {
         Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DIRECTORS WHERE directors_id = ?",Integer.class,id);
         if(result == 0) {
