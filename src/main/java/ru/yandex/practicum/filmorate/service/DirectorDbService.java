@@ -11,7 +11,7 @@ import java.util.Optional;
 @Service
 public class DirectorDbService {
     DirectorStorage directorStorage;
-    @Autowired
+     @Autowired
     public DirectorDbService(DirectorStorage directorStorage) {
         this.directorStorage = directorStorage;
     }
