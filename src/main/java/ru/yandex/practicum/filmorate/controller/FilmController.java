@@ -96,6 +96,11 @@ public class FilmController {
         return filmService.getCommonFilms(userId, friendId);
     }
 
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirector(@PathVariable Long directorId, @RequestParam String sortBy) {
+        boolean sortByLikes = "likes".equalsIgnoreCase(sortBy);
+        return filmService.getFilmsByDirectorSortedByLikesOrYear(directorId, sortByLikes);
+    }
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {
         if (id == null || id <= 0) {
