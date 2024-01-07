@@ -282,7 +282,8 @@ public class FilmDbStorage implements FilmStorage {
     private int compareGenre(Genre genre1, Genre genre2) {
         return Integer.compare(genre1.getId(), genre2.getId());
     }
-    private int compareDirector (Director director1, Director director2) {
+
+    private int compareDirector(Director director1, Director director2) {
         return Integer.compare(director1.getId(), director2.getId());
     }
 
