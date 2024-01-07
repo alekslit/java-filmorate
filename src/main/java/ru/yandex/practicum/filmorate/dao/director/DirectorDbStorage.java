@@ -71,6 +71,7 @@ public class DirectorDbStorage implements DirectorStorage {
         director.setId(directorId);
         return director;
     }
+
     @Override
     public Director updateDirector(Director director) {
         if (getByIdDirector(director.getId()).isPresent()) {
