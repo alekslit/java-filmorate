@@ -11,7 +11,6 @@ import java.util.Optional;
 @Service
 public class DirectorDbService {
     DirectorStorage directorStorage;
-
     @Autowired
     public DirectorDbService(DirectorStorage directorStorage) {
         this.directorStorage = directorStorage;
@@ -32,6 +31,7 @@ public class DirectorDbService {
     public Director updateDirector(Director director) {
         return directorStorage.updateDirector(director);
     }
+
     public boolean deleteDirector(Integer id) {
         directorStorage.deleteDirector(id);
         return true;
