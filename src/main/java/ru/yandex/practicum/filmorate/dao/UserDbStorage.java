@@ -151,7 +151,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     /*---Получить список друзей User---*/
-
     public List<User> getAllFriendsList(Long id) {
         if (checkIfUserExists(id)) {
             String sqlQuery = SQL_QUERY_GET_ALL_FRIEND_LIST;
@@ -161,8 +160,8 @@ public class UserDbStorage implements UserStorage {
             throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + id, ILLEGAL_USER_ID_ADVICE);
         }
     }
-    /*---Получить список общих друзей для двух User---*/
 
+    /*---Получить список общих друзей для двух User---*/
     public List<User> getCommonFriends(Long id, Long otherId) {
         if (checkIfUserExists(id) && checkIfUserExists(otherId)) {
             String sqlQuery = SQL_QUERY_GET_COMMON_FRIENDS;
@@ -172,8 +171,8 @@ public class UserDbStorage implements UserStorage {
             throw new IllegalIdException(ILLEGAL_COMMON_USER_ID_MESSAGE, ILLEGAL_USER_ID_ADVICE);
         }
     }
-    /*-----Вспомогательные методы-----*/
 
+    /*-----Вспомогательные методы-----*/
     private static Map<String, Object> userToMap(User user) {
         return Map.of(
                 "email", user.getEmail(),
@@ -213,7 +212,8 @@ public class UserDbStorage implements UserStorage {
     }
 
     private boolean checkIfUserExists(Long id) {
-        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS WHERE user_id = ?", Integer.class, id);
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS WHERE user_id = ?",
+                Integer.class, id);
         if (result == 0) {
             log.error("Пользователя с таким id {} нет", id);
             return false;
