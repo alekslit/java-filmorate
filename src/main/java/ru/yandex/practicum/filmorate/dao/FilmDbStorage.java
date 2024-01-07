@@ -198,7 +198,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private boolean checkIfDirectorExists(Long id) {
         Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DIRECTORS WHERE directors_id = ?",Integer.class,id);
-        if(result == 0) {
+        if (result == 0) {
             log.error("режиссера с таким id {} нет", id);
             return false;
         }
@@ -279,6 +279,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setDirectors(sortedHashSet);
     }
 
+
     private int compareGenre(Genre genre1, Genre genre2) {
         return Integer.compare(genre1.getId(), genre2.getId());
     }
@@ -305,7 +306,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Map<Long, List<FilmDirector>> getFilmDirectorsMap(List<Long> filmsId) {
-        List<FilmDirector> directors =getDirectors(filmsId);
+        List<FilmDirector> directors = getDirectors(filmsId);
         return directors.stream()
                 .collect(Collectors.groupingBy(FilmDirector::getFilmId));
     }
