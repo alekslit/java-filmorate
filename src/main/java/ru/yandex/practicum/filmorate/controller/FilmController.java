@@ -100,6 +100,7 @@ public class FilmController {
         return filmService.getFilmsByDirectorSortedByLikesOrYear(directorId, sortByLikes);
     }
 
+
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {
         if (id == null || id <= 0) {
