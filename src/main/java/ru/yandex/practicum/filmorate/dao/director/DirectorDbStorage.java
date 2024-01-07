@@ -71,10 +71,9 @@ public class DirectorDbStorage implements DirectorStorage {
         director.setId(directorId);
         return director;
     }
-
     @Override
     public Director updateDirector(Director director) {
-        if(getByIdDirector(director.getId()).isPresent()) {
+        if (getByIdDirector(director.getId()).isPresent()) {
             String query = "UPDATE directors SET name = ? WHERE directors_id = ?;";
             log.info("UPDATE request to DB Directors: " + director.getName());
             jdbcTemplate.update(query, director.getName(), director.getId());
