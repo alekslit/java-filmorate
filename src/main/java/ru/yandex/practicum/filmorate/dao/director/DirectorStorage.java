@@ -10,7 +10,6 @@ public interface DirectorStorage {
     Optional<Director> getByIdDirector(Integer id);
     Director addDirector(Director director);
     Director updateDirector(Director director);
-
     void deleteDirector(Integer id);
 
 }

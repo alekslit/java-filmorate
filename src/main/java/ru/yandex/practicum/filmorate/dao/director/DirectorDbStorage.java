@@ -53,7 +53,7 @@ public class DirectorDbStorage implements DirectorStorage {
 
             return Optional.ofNullable(jdbcTemplate.queryForObject(query, this::mapRowToDirector, id));
 
-        }catch (EmptyResultDataAccessException exception) {
+        } catch (EmptyResultDataAccessException exception) {
             log.debug("{}: " + INVALID_DATA_BASE_QUERY_MESSAGE + " Размер ответа на запрос: "
                     + exception.getExpectedSize(), IllegalIdException.class.getSimpleName());
             throw new InvalidDataBaseQueryException(INVALID_DATA_BASE_QUERY_MESSAGE,
