@@ -33,9 +33,8 @@ public class SqlQuery {
                     "FROM FILMS AS f " +
                     "LEFT OUTER JOIN mpa_rating AS mp ON f.mpa_rating_id = mp.mpa_rating_id  " +
                     "LEFT OUTER JOIN film_directors AS fd ON (f.film_id = fd.film_id) " +
-                    "LEFT OUTER JOIN directors AS d ON (d.directors_id = fd.directors_id) " +
                     "LEFT OUTER JOIN film_likes AS fl ON f.film_id = fl.film_id " +
-                    "WHERE d.directors_id = ? " +
+                    "WHERE fd.directors_id = ? " +
                     "GROUP BY f.film_id ";
     public static final String SQL_QUERY_GET_FILM_BY_ID =
             "SELECT f.film_id, " +
