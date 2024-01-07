@@ -78,7 +78,9 @@ public class FilmController {
 
     // получаем список топ фильмов по количеству лайков в размере {count}:
     @GetMapping("/popular")
-    public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10", required = false) Integer count) {
+    public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10", required = false) Integer count,
+                                          @RequestParam(defaultValue = "0", required = false) Long genreId,
+                                          @RequestParam(defaultValue = "0", required = false) Integer year) {
         if (count <= 0) {
             log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT + " = " + count,
                     IncorrectRequestParameterException.class.getSimpleName());
@@ -86,7 +88,13 @@ public class FilmController {
                     REQUEST_PARAMETER_COUNT_ADVICE);
         }
 
-        return filmService.getTopFilmsForLikes(count);
+        // обычный топ фильмов:
+        if (genreId == 0 && year == 0) {
+            return filmService.getTopFilmsForLikes(count);
+        }
+
+        // топ фильмов указанного жанра {genreId} за нужный год {year}:
+        return filmService.getTopFilmsForLikesWithYearAndGenreFilter(count, genreId, year);
     }
 
     @GetMapping("/common")
