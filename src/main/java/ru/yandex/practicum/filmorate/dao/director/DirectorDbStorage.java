@@ -31,7 +31,6 @@ public class DirectorDbStorage implements DirectorStorage {
                 .name(resultSet.getString("name"))
                 .build();
     }
-
     private static Map<String, Object> directorToMap(Director director) {
         return Map.of(
                 "directors_id", director.getId(),
