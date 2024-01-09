@@ -88,7 +88,7 @@ public class FilmDbStorage implements FilmStorage {
             addFilm(film);
             log.debug("Добавлен новый фильм: " + film.getName() + ", с id = " + film.getId());
         }
-        return getFilmById(film.getId());
+        return film;
     }
 
     /*---Получить список всех Film---*/
@@ -126,6 +126,11 @@ public class FilmDbStorage implements FilmStorage {
         }
         log.error("режиссер с id {} еще не добавлен.", directorId);
         throw new IllegalIdException(ILLEGAL_FILM_ID_MESSAGE + directorId, ILLEGAL_FILM_ID_ADVICE);
+    }
+
+    @Override
+    public List<Film> searchFilmsByDirectorOrTitle(String query, String by) {
+        return null;
     }
 
     /*---Удалить фильм по id---*/

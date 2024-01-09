@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -80,7 +81,8 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10", required = false) Integer count) {
         if (count <= 0) {
-            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT + " = " + count, IncorrectRequestParameterException.class.getSimpleName());
+            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE +
+                    REQUEST_PARAM_COUNT + " = " + count, IncorrectRequestParameterException.class.getSimpleName());
             throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT, REQUEST_PARAMETER_COUNT_ADVICE);
         }
 
@@ -100,6 +102,10 @@ public class FilmController {
         return filmService.getFilmsByDirectorSortedByLikesOrYear(directorId, sortByLikes);
     }
 
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam("query") @NonNull String query, @RequestParam("by") @NonNull String by) {
+        return filmService.searchFilmsByDirectorOrTitle(query,by);
+    }
 
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {

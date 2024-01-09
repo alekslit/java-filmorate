@@ -65,4 +65,9 @@ public class FilmDbService implements FilmService {
     public List<Film> getFilmsByDirectorSortedByLikesOrYear(Long directorId, boolean sortByLikes) {
         return filmStorage.getFilmsByDirectorSortedByLikesOrYear(directorId,sortByLikes);
     }
+
+    @Override
+    public List<Film> searchFilmsByDirectorOrTitle(String query, String by) {
+        return filmStorage.searchFilmsByDirectorOrTitle(query, by);
+    }
 }
