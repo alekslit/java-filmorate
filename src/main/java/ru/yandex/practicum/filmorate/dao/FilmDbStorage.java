@@ -88,7 +88,7 @@ public class FilmDbStorage implements FilmStorage {
             addFilm(film);
             log.debug("Добавлен новый фильм: " + film.getName() + ", с id = " + film.getId());
         }
-        return getFilmById(film.getId());
+        return film;
     }
 
     /*---Получить список всех Film---*/

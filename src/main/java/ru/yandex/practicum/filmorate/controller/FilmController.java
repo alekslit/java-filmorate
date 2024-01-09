@@ -80,7 +80,8 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10", required = false) Integer count) {
         if (count <= 0) {
-            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT + " = " + count, IncorrectRequestParameterException.class.getSimpleName());
+            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE +
+                    REQUEST_PARAM_COUNT + " = " + count, IncorrectRequestParameterException.class.getSimpleName());
             throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT, REQUEST_PARAMETER_COUNT_ADVICE);
         }
 
