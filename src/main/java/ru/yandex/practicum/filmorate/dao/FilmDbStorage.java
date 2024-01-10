@@ -194,6 +194,7 @@ public class FilmDbStorage implements FilmStorage {
             List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES + TOP_FILMS_WITH_YEAR_FILTER,
                     getFilmMapper(), year, count);
             setGenreForFilms(films);
+            setDirectorForFilms(films);
             return films;
 
         } else if (year == 0) {
@@ -201,6 +202,7 @@ public class FilmDbStorage implements FilmStorage {
             List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES + TOP_FILMS_WITH_GENRE_FILTER,
                     getFilmMapper(), genreId, count);
             setGenreForFilms(films);
+            setDirectorForFilms(films);
             return films;
         }
 
@@ -208,6 +210,7 @@ public class FilmDbStorage implements FilmStorage {
         List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES
                         + TOP_FILMS_WITH_GENRE_AND_YEAR_FILTER, getFilmMapper(), genreId, year, count);
         setGenreForFilms(films);
+        setDirectorForFilms(films);
         return films;
     }
 
