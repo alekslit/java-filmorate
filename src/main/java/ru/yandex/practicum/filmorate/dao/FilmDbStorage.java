@@ -79,6 +79,10 @@ public class FilmDbStorage implements FilmStorage {
                 if (film.getGenres() != null) {
                     saveGenres(film);
                     sortGenres(film);
+                } else {
+                    film = film.toBuilder()
+                            .genres(new HashSet<>())
+                            .build();
                 }
             }
             if (!savedFilm.getDirectors().equals(film.getDirectors())) {
@@ -150,7 +154,7 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(SQL_QUERY_FILM_ADD_LIKE, id, userId);
         } else {
             log.error("Неверно указаны параметры запроса {}, {}", id, userId);
-            throw new IllegalIdException(ILLEGAL_COMMON_ILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
+            throw new IllegalIdException(ILLEGAL_COMMON_FILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
         }
         return String.format("Пользователь с id: %d, поставил лайк фильму с id: %d.", userId, id);
     }
@@ -161,7 +165,7 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(SQL_QUERY_REMOVE_LIKE_FROM_FILM, userId, id);
         } else {
             log.error("Неверно указаны данные для удаления лайка: userId {}, id {}", userId, id);
-            throw new IllegalIdException(ILLEGAL_COMMON_ILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
+            throw new IllegalIdException(ILLEGAL_COMMON_FILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
         }
         return String.format("Пользователь с id: %d, удалил свой лайк фильму с id: %d.", userId, id);
     }

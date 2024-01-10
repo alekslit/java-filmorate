@@ -57,7 +57,7 @@ public class FilmDbService implements FilmService {
     }
 
     @Override
-    public List<Film> getCommonFilms(Long userId, Long friendId) { //todo
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
