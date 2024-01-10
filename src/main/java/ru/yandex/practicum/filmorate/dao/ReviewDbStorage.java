@@ -39,7 +39,7 @@ public class ReviewDbStorage implements ReviewStorage {
             throw new IllegalIdException(ILLEGAL_FILM_ID_MESSAGE + reviewId, ILLEGAL_FILM_ID_ADVICE);
         }
     }
-    
+
     @Override
     public Review addReview(Review review) {
         checkParameters(review);
@@ -64,7 +64,7 @@ public class ReviewDbStorage implements ReviewStorage {
             throw new IncorrectRequestParameterException("Неверно переданы данные 404", ILLEGAL_REVIEW_ID_ADVICE);
         }
     }
-    
+
     @Override
     public Review updateReviewById(Review review) {
         checkParameters(review);

@@ -2,11 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.ReviewStorage;
-import ru.yandex.practicum.filmorate.dao.UserStorage;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.List;
