@@ -9,7 +9,7 @@ public class SqlQuery {
                     "description = ?, " +
                     "duration = ?, " +
                     "mpa_rating_id = ? " +
-            "WHERE film_id = ?";
+                    "WHERE film_id = ?";
 
     public static final String SQL_QUERY_GET_ALL_FILMS =
             "SELECT f.film_id, " +
