@@ -88,7 +88,7 @@ public class FilmDbStorage implements FilmStorage {
             addFilm(film);
             log.debug("Добавлен новый фильм: " + film.getName() + ", с id = " + film.getId());
         }
-        return film;
+        return getFilmById(film.getId());
     }
 
     /*---Получить список всех Film---*/
@@ -118,8 +118,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getFilmsByDirectorSortedByLikesOrYear(Long directorId, boolean sortByLikes) {
         if (checkIfDirectorExists(directorId)) {
             String orderByClause = sortByLikes ? "ORDER BY COUNT(fl.film_likes_id) ASC;" : "ORDER BY f.release_date ASC;";
-            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS_BY_DIRECTOR
-                    + orderByClause, getFilmMapper(), directorId);
+            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS_BY_DIRECTOR + orderByClause, getFilmMapper(), directorId);
             setGenreForFilms(films);
             setDirectorForFilms(films);
             return films;
@@ -129,8 +128,30 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> searchFilmsByDirectorOrTitle(String query, String by) {
-        return null;
+    public List<Film> searchFilmsByDirector(String query) {
+        String searchQuery = "%" + query + "%";
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_DIRECTOR, getFilmMapper(), searchQuery.toUpperCase());
+        setGenreForFilms(films);
+        setDirectorForFilms(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitle(String query) {
+        String searchQuery = "%" + query + "%";
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE, getFilmMapper(), searchQuery.toUpperCase());
+        setGenreForFilms(films);
+        setDirectorForFilms(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitleAndDirector(String query) {
+        String searchQuery = "%" + query + "%";
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE_AND_DIRECTOR, getFilmMapper(), searchQuery.toUpperCase(), searchQuery.toUpperCase());
+        setGenreForFilms(films);
+        setDirectorForFilms(films);
+        return films;
     }
 
     /*---Удалить фильм по id---*/
@@ -180,7 +201,6 @@ public class FilmDbStorage implements FilmStorage {
         setDirectorForFilms(films);
         return films;
     }
-
 
     /*------Вспомогательные методы------*/
     private boolean checkIfFilmExists(Long id) {

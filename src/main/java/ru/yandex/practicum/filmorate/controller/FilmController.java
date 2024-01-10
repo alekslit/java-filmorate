@@ -104,7 +104,16 @@ public class FilmController {
 
     @GetMapping("/search")
     public List<Film> searchFilms(@RequestParam("query") @NonNull String query, @RequestParam("by") @NonNull String by) {
-        return filmService.searchFilmsByDirectorOrTitle(query,by);
+        if ("director".equalsIgnoreCase(by)) {
+            return filmService.searchFilmsByDirector(query);
+        } else if ("title".equalsIgnoreCase(by)) {
+            return filmService.searchFilmsByTitle(query);
+        } else if ("director,title".equalsIgnoreCase(by) || "title,director".equalsIgnoreCase(by)) {
+            return filmService.searchFilmsByTitleAndDirector(query);
+        } else {
+            throw new IllegalArgumentException("Invalid 'by' parameter. Supported values are 'director', 'title'," +
+                    " 'director,title' and 'title,director' ");
+        }
     }
 
     // вспомогательный метод для проверки id:

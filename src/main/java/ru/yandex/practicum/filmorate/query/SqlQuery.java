@@ -48,6 +48,53 @@ public class SqlQuery {
                     "JOIN mpa_rating AS mp ON f.mpa_rating_id = mp.mpa_rating_id  " +
                     "WHERE f.film_id = ?;";
 
+    public static final String SQL_QUERY_SEARCH_FILMS_BY_DIRECTOR =
+            "SELECT f.film_id, " +
+                    "f.name, " +
+                    "f.release_date, " +
+                    "f.description, " +
+                    "f.duration, " +
+                    "mp.mpa_rating_id, " +
+                    "mp.name AS mpa_name " +
+                    "FROM FILMS AS f " +
+                    "LEFT OUTER JOIN mpa_rating AS mp ON f.mpa_rating_id = mp.mpa_rating_id  " +
+                    "LEFT OUTER JOIN film_likes AS fl ON f.film_id = fl.film_id " +
+                    "LEFT OUTER JOIN film_directors AS fd ON (f.film_id = fd.film_id) " +
+                    "LEFT OUTER JOIN directors AS d ON (fd.directors_id = d.directors_id) " +
+                    "WHERE UPPER(d.name) LIKE ? " +
+                    "GROUP BY f.film_id, fl.user_id  " +
+                    "ORDER BY COUNT(fl.user_id) DESC;";
+    public static final String SQL_QUERY_SEARCH_FILMS_BY_TITLE =
+            "SELECT f.film_id, " +
+                    "f.name, " +
+                    "f.release_date, " +
+                    "f.description, " +
+                    "f.duration, " +
+                    "mp.mpa_rating_id, " +
+                    "mp.name AS mpa_name " +
+                    "FROM FILMS AS f " +
+                    "LEFT OUTER JOIN mpa_rating AS mp ON f.mpa_rating_id = mp.mpa_rating_id  " +
+                    "LEFT OUTER JOIN film_likes AS fl ON f.film_id = fl.film_id " +
+                    "WHERE UPPER(f.name) LIKE ? " +
+                    "GROUP BY f.film_id, fl.user_id  " +
+                    "ORDER BY COUNT(fl.user_id) DESC;";
+    public static final String SQL_QUERY_SEARCH_FILMS_BY_TITLE_AND_DIRECTOR =
+            "SELECT f.film_id, " +
+                    "f.name, " +
+                    "f.release_date, " +
+                    "f.description, " +
+                    "f.duration, " +
+                    "mp.mpa_rating_id, " +
+                    "mp.name AS mpa_name " +
+                    "FROM FILMS AS f " +
+                    "LEFT OUTER JOIN mpa_rating AS mp ON f.mpa_rating_id = mp.mpa_rating_id  " +
+                    "LEFT OUTER JOIN film_likes AS fl ON f.film_id = fl.film_id " +
+                    "LEFT OUTER JOIN film_directors AS fd ON (f.film_id = fd.film_id) " +
+                    "LEFT OUTER JOIN directors AS d ON (fd.directors_id = d.directors_id) " +
+                    "WHERE UPPER(d.name) LIKE ? " +
+                    "OR UPPER(f.name) LIKE ? "+
+                    "GROUP BY f.film_id, fl.user_id  " +
+                    "ORDER BY COUNT(fl.user_id) DESC;";
     public static final String SQL_QUERY_FILM_ADD_LIKE =
             "INSERT INTO film_likes(film_id, user_id) " +
                     "VALUES(?, ?);";
