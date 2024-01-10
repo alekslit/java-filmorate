@@ -114,8 +114,8 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilmById(Long filmId) {
         if (checkIfFilmExists(filmId)) {
             Film film = jdbcTemplate.queryForObject(SQL_QUERY_GET_FILM_BY_ID, getFilmMapper(), filmId);
-                setGenreForFilm(film);
-                setDirectorsForFilm(film);
+            setGenreForFilm(film);
+            setDirectorsForFilm(film);
             return film;
         }
         log.error("фильм с id {} еще не добавлен.", filmId);
@@ -205,7 +205,7 @@ public class FilmDbStorage implements FilmStorage {
 
         // топ с фильтром по жанру {genreId} и году {year}:
         List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES
-                        + TOP_FILMS_WITH_GENRE_AND_YEAR_FILTER, getFilmMapper(), genreId, year, count);
+                + TOP_FILMS_WITH_GENRE_AND_YEAR_FILTER, getFilmMapper(), genreId, year, count);
         setGenreForFilms(films);
         return films;
     }
@@ -232,7 +232,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private boolean checkIfDirectorExists(Long id) {
-        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DIRECTORS WHERE directors_id = ?",Integer.class,id);
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DIRECTORS WHERE directors_id = ?", Integer.class, id);
         if (result == 0) {
             log.error("режиссера с таким id {} нет", id);
             return false;

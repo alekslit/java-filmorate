@@ -63,7 +63,7 @@ public class FilmDbService implements FilmService {
 
     @Override
     public List<Film> getFilmsByDirectorSortedByLikesOrYear(Long directorId, boolean sortByLikes) {
-        return filmStorage.getFilmsByDirectorSortedByLikesOrYear(directorId,sortByLikes);
+        return filmStorage.getFilmsByDirectorSortedByLikesOrYear(directorId, sortByLikes);
     }
 
     @Override

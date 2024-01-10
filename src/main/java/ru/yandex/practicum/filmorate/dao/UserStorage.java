@@ -20,4 +20,4 @@ public interface UserStorage {
 
     List<Film> getRecommendations(Long id);
 
-    }
+}

@@ -36,6 +36,7 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     private final FilmDbStorage filmDbStorage;
+
     @Autowired
     public UserDbStorage(JdbcTemplate jdbcTemplate, FilmDbStorage filmDbStorage) {
         this.filmDbStorage = filmDbStorage;
