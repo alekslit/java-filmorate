@@ -322,7 +322,7 @@ public class FilmDbStorage implements FilmStorage {
         return Integer.compare(director1.getId(), director2.getId());
     }
 
-    private void setGenreForFilms(List<Film> films) {
+    public void setGenreForFilms(List<Film> films) {
         Map<Long, List<FilmGenre>> filmGenreMap = getFilmGenreMap(getFilmsId(films));
         films.forEach(film -> film.setGenres(getGenresForFilm(film.getId(), filmGenreMap)));
         films.forEach(this::sortGenres);

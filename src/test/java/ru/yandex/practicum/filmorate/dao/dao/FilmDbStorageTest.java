@@ -1,4 +1,3 @@
-/*
 package ru.yandex.practicum.filmorate.dao.dao;
 
 import lombok.RequiredArgsConstructor;
@@ -9,12 +8,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
+import ru.yandex.practicum.filmorate.dao.director.DirectorDbStorage;
+import ru.yandex.practicum.filmorate.dao.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -36,10 +34,14 @@ public class FilmDbStorageTest {
     private Film film;
     private User userForLike;
     private Film filmForCheckTopList;
+    private DirectorStorage directorStorage;
 
     public void init() {
         filmStorage = new FilmDbStorage(jdbcTemplate);
-        userStorage = new UserDbStorage(jdbcTemplate);
+        userStorage = new UserDbStorage(jdbcTemplate, filmStorage);
+        directorStorage = new DirectorDbStorage(jdbcTemplate);
+        Director director = new Director(1, "TestDirector");
+        directorStorage.addDirector(director);
         film = Film.builder()
                 .name("test_film1_name")
                 .description("test_film1_description")
@@ -52,6 +54,10 @@ public class FilmDbStorageTest {
                 .genres(Set.of(Genre.builder()
                         .id(1)
                         .name("Комедия")
+                        .build()))
+                .directors(Set.of(Director.builder()
+                        .id(director.getId())
+                        .name(director.getName())
                         .build()))
                 .build();
         userForLike = User.builder()
@@ -235,4 +241,3 @@ public class FilmDbStorageTest {
                 exception.getMessage(), "Ошибка: метод работает с отрицательным id.");
     }
 }
-*/
