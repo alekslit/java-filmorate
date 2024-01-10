@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao.dao.test.java.ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
