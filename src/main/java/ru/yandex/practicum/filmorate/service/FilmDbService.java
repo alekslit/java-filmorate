@@ -57,7 +57,17 @@ public class FilmDbService implements FilmService {
     }
 
     @Override
-    public List<Film> getCommonFilms(Long userId, Long friendId) { //todo
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorSortedByLikesOrYear(Long directorId, boolean sortByLikes) {
+        return filmStorage.getFilmsByDirectorSortedByLikesOrYear(directorId,sortByLikes);
+    }
+
+    @Override
+    public List<Film> getTopFilmsForLikesWithYearAndGenreFilter(Integer count, Long genreId, Integer year) {
+        return filmStorage.getTopFilmsForLikesWithYearAndGenreFilter(count, genreId, year);
     }
 }

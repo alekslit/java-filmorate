@@ -37,4 +37,5 @@ public class Film {
 
     // жанры фильма:
     private Set<Genre> genres;
+    private Set<Director> directors;
 }
