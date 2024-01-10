@@ -69,7 +69,6 @@ public class SqlQuery {
                     "LEFT OUTER JOIN mpa_rating AS mr ON (f.mpa_rating_id = mr.mpa_rating_id) " +
                     "JOIN film_likes AS fl1 ON (fl1.film_id = f.film_id) " +
                     "JOIN film_likes AS fl2 ON (fl2.film_id = f.film_id) " +
-                    "JOIN film_likes AS fl3 ON(fl3.film_id = f.film_id) " +
                     "WHERE fl1.user_id = ? AND fl2.user_id = ? " +
                     "GROUP BY fl1.film_id " +
                     "ORDER BY COUNT(fl1.USER_ID) DESC;";

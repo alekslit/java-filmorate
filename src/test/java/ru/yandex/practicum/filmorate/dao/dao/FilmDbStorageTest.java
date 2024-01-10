@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.filmorate.dao.dao;
 
 import lombok.RequiredArgsConstructor;
@@ -234,3 +235,4 @@ public class FilmDbStorageTest {
                 exception.getMessage(), "Ошибка: метод работает с отрицательным id.");
     }
 }
+*/

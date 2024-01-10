@@ -114,6 +114,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+
     /*---Поставить лайк фильму---*/
     public String addLikeToFilm(Long id, Long userId) {
         if (checkIfFilmExists(id) && checkIfUserExists(userId)) {
@@ -143,6 +144,7 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    /*---Получить общие фильмы двух пользователей---*/
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_COMMON_FILMS, getFilmMapper(), userId, friendId);
         setGenreForFilms(films);
@@ -222,7 +224,7 @@ public class FilmDbStorage implements FilmStorage {
         return Integer.compare(genre1.getId(), genre2.getId());
     }
 
-    private void setGenreForFilms(List<Film> films) {
+    public void setGenreForFilms(List<Film> films) {
         Map<Long, List<FilmGenre>> filmGenreMap = getFilmGenreMap(getFilmsId(films));
         films.forEach(film -> film.setGenres(getGenresForFilm(film.getId(), filmGenreMap)));
         films.forEach(this::sortGenres);
@@ -269,7 +271,7 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.toSet());
     }
 
-    public void setGenreForFilm(Film film) {
+    protected void setGenreForFilm(Film film) {
         List<FilmGenre> filmGenreList = getGenres(Collections.singletonList(film.getId()));
         if (filmGenreList.isEmpty()) {
             log.error("Для фильма с id {} не указано жанров", film.getId());
