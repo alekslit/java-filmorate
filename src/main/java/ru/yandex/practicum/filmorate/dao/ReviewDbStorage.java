@@ -110,7 +110,7 @@ public class ReviewDbStorage implements ReviewStorage {
         );
         return reviews;
     }
- 
+
     /*
                 .reviewId(rs.getLong("review_id"))
                 .content(rs.getString("content"))
@@ -118,7 +118,7 @@ public class ReviewDbStorage implements ReviewStorage {
                 .userId(rs.getLong("user_id"))
                 .filmId(rs.getLong("film_id"))
                 .useful(rs.getLong("useful"))
-     */
+    */
 
     public String likeReview(Long reviewId, Long userId) {
         if (!checkIfLikeOrDislikeAdded(reviewId, userId, true)) {
