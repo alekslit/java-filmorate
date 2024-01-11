@@ -92,7 +92,7 @@ public class SqlQuery {
                     "LEFT OUTER JOIN film_directors AS fd ON (f.film_id = fd.film_id) " +
                     "LEFT OUTER JOIN directors AS d ON (fd.directors_id = d.directors_id) " +
                     "WHERE UPPER(d.name) LIKE ? " +
-                    "OR UPPER(f.name) LIKE ? "+
+                    "OR UPPER(f.name) LIKE ? " +
                     "GROUP BY f.film_id, fl.user_id  " +
                     "ORDER BY COUNT(fl.user_id) DESC;";
     public static final String SQL_QUERY_FILM_ADD_LIKE =
