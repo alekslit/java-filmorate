@@ -17,7 +17,6 @@ import java.util.Optional;
 public class DirectorController {
     private final DirectorDbService directorDbService;
 
-
     @GetMapping
     public List<Director> getAllDirectors() {
         return directorDbService.getAllDirectors();

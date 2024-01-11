@@ -127,14 +127,40 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getFilmsByDirectorSortedByLikesOrYear(Long directorId, boolean sortByLikes) {
         if (checkIfDirectorExists(directorId)) {
             String orderByClause = sortByLikes ? "ORDER BY COUNT(fl.film_likes_id) ASC;" : "ORDER BY f.release_date ASC;";
-            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS_BY_DIRECTOR
-                    + orderByClause, getFilmMapper(), directorId);
+            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS_BY_DIRECTOR + orderByClause, getFilmMapper(), directorId);
             setGenreForFilms(films);
             setDirectorForFilms(films);
             return films;
         }
         log.error("режиссер с id {} еще не добавлен.", directorId);
         throw new IllegalIdException(ILLEGAL_FILM_ID_MESSAGE + directorId, ILLEGAL_FILM_ID_ADVICE);
+    }
+
+    @Override
+    public List<Film> searchFilmsByDirector(String query) {
+        String searchQuery = "%" + query + "%";
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_DIRECTOR, getFilmMapper(), searchQuery.toUpperCase());
+        setGenreForFilms(films);
+        setDirectorForFilms(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitle(String query) {
+        String searchQuery = "%" + query + "%";
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE, getFilmMapper(), searchQuery.toUpperCase());
+        setGenreForFilms(films);
+        setDirectorForFilms(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitleAndDirector(String query) {
+        String searchQuery = "%" + query + "%";
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE_AND_DIRECTOR, getFilmMapper(), searchQuery.toUpperCase(), searchQuery.toUpperCase());
+        setGenreForFilms(films);
+        setDirectorForFilms(films);
+        return films;
     }
 
     /*---Удалить фильм по id---*/
