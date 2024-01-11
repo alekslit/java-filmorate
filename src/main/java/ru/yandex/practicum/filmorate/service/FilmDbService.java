@@ -57,7 +57,7 @@ public class FilmDbService implements FilmService {
     }
 
     @Override
-    public List<Film> getCommonFilms(Long userId, Long friendId) { //todo
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
@@ -81,4 +81,8 @@ public class FilmDbService implements FilmService {
         return filmStorage.searchFilmsByTitleAndDirector(query);
     }
 
+    @Override
+    public List<Film> getTopFilmsForLikesWithYearAndGenreFilter(Integer count, Long genreId, Integer year) {
+        return filmStorage.getTopFilmsForLikesWithYearAndGenreFilter(count, genreId, year);
+    }
 }

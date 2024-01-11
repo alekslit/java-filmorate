@@ -67,13 +67,22 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         if (checkIfFilmExists(film.getId())) {
             Film savedFilm = getFilmById(film.getId());
-            jdbcTemplate.update(SQL_QUERY_UPDATE_FILM, film.getName(), film.getReleaseDate(), film.getDescription(), film.getDuration(),
-                    film.getMpa().getId(), film.getId());
+            jdbcTemplate.update(SQL_QUERY_UPDATE_FILM,
+                    film.getName(),
+                    film.getReleaseDate(),
+                    film.getDescription(),
+                    film.getDuration(),
+                    film.getMpa().getId(),
+                    film.getId());
             if (!savedFilm.getGenres().equals(film.getGenres())) {
                 jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?", film.getId());
                 if (film.getGenres() != null) {
                     saveGenres(film);
                     sortGenres(film);
+                } else {
+                    film = film.toBuilder()
+                            .genres(new HashSet<>())
+                            .build();
                 }
             }
             if (!savedFilm.getDirectors().equals(film.getDirectors())) {
@@ -88,7 +97,7 @@ public class FilmDbStorage implements FilmStorage {
             addFilm(film);
             log.debug("Добавлен новый фильм: " + film.getName() + ", с id = " + film.getId());
         }
-        return getFilmById(film.getId());
+        return film;
     }
 
     /*---Получить список всех Film---*/
@@ -171,7 +180,7 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(SQL_QUERY_FILM_ADD_LIKE, id, userId);
         } else {
             log.error("Неверно указаны параметры запроса {}, {}", id, userId);
-            throw new IllegalIdException(ILLEGAL_COMMON_ILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
+            throw new IllegalIdException(ILLEGAL_COMMON_FILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
         }
         return String.format("Пользователь с id: %d, поставил лайк фильму с id: %d.", userId, id);
     }
@@ -182,14 +191,15 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(SQL_QUERY_REMOVE_LIKE_FROM_FILM, userId, id);
         } else {
             log.error("Неверно указаны данные для удаления лайка: userId {}, id {}", userId, id);
-            throw new IllegalIdException(ILLEGAL_COMMON_ILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
+            throw new IllegalIdException(ILLEGAL_COMMON_FILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
         }
         return String.format("Пользователь с id: %d, удалил свой лайк фильму с id: %d.", userId, id);
     }
 
     /*---Получить топ фильмов по популярности---*/
     public List<Film> getTopFilmsForLikes(Integer count) {
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES, getFilmMapper(), count);
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES + JUST_TOP_FILMS,
+                getFilmMapper(), count);
         setGenreForFilms(films);
         setDirectorForFilms(films);
         return films;
@@ -202,9 +212,38 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    /*---Получаем список топ фильмов по количеству лайков в размере {count},
+    указанного жанра {genreId} за нужный год {year}---*/
+    public List<Film> getTopFilmsForLikesWithYearAndGenreFilter(Integer count, Long genreId, Integer year) {
+        if (genreId == 0) {
+            // топ с фильтром по году {year}:
+            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES + TOP_FILMS_WITH_YEAR_FILTER,
+                    getFilmMapper(), year, count);
+            setGenreForFilms(films);
+            setDirectorForFilms(films);
+            return films;
+
+        } else if (year == 0) {
+            // топ с фильтром по жанру {genreId}:
+            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES + TOP_FILMS_WITH_GENRE_FILTER,
+                    getFilmMapper(), genreId, count);
+            setGenreForFilms(films);
+            setDirectorForFilms(films);
+            return films;
+        }
+
+        // топ с фильтром по жанру {genreId} и году {year}:
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES
+                        + TOP_FILMS_WITH_GENRE_AND_YEAR_FILTER, getFilmMapper(), genreId, year, count);
+        setGenreForFilms(films);
+        setDirectorForFilms(films);
+        return films;
+    }
+
     /*------Вспомогательные методы------*/
     private boolean checkIfFilmExists(Long id) {
-        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM FILMS WHERE film_id = ?", Integer.class, id);
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM FILMS WHERE film_id = ?",
+                Integer.class, id);
         if (result == 0) {
             log.error("фильм с id {} еще не добавлен.", id);
             return false;
@@ -213,7 +252,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private boolean checkIfUserExists(Long id) {
-        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS WHERE user_id = ?", Integer.class, id);
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS WHERE user_id = ?",
+                Integer.class, id);
         if (result == 0) {
             log.error("Пользователя с таким id {} нет", id);
             return false;

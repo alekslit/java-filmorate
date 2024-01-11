@@ -30,4 +30,6 @@ public interface FilmService {
     List<Film> searchFilmsByTitle(String query);
 
     List<Film> searchFilmsByTitleAndDirector(String query);
+
+    List<Film> getTopFilmsForLikesWithYearAndGenreFilter(Integer count, Long genreId, Integer year);
 }
