@@ -78,15 +78,22 @@ public class FilmController {
 
     // получаем список топ фильмов по количеству лайков в размере {count}:
     @GetMapping("/popular")
-    public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10", required = false) Integer count) {
+    public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10", required = false) Integer count,
+                                          @RequestParam(defaultValue = "0", required = false) Long genreId,
+                                          @RequestParam(defaultValue = "0", required = false) Integer year) {
         if (count <= 0) {
-            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT + " = " + count,
-                    IncorrectRequestParameterException.class.getSimpleName());
-            throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT,
-                    REQUEST_PARAMETER_COUNT_ADVICE);
+            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE +
+                    REQUEST_PARAM_COUNT + " = " + count, IncorrectRequestParameterException.class.getSimpleName());
+            throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT, REQUEST_PARAMETER_COUNT_ADVICE);
         }
 
-        return filmService.getTopFilmsForLikes(count);
+        // обычный топ фильмов:
+        if (genreId == 0 && year == 0) {
+            return filmService.getTopFilmsForLikes(count);
+        }
+
+        // топ фильмов указанного жанра {genreId} за нужный год {year}:
+        return filmService.getTopFilmsForLikesWithYearAndGenreFilter(count, genreId, year);
     }
 
     @GetMapping("/common")
@@ -96,13 +103,18 @@ public class FilmController {
         return filmService.getCommonFilms(userId, friendId);
     }
 
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirector(@PathVariable Long directorId, @RequestParam String sortBy) {
+        boolean sortByLikes = "likes".equalsIgnoreCase(sortBy);
+        return filmService.getFilmsByDirectorSortedByLikesOrYear(directorId, sortByLikes);
+    }
+
+
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {
         if (id == null || id <= 0) {
-            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id,
-                    IncorrectPathVariableException.class.getSimpleName());
-            throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
-                    PATH_VARIABLE_ID_ADVICE);
+            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id, IncorrectPathVariableException.class.getSimpleName());
+            throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable, PATH_VARIABLE_ID_ADVICE);
         }
     }
 }

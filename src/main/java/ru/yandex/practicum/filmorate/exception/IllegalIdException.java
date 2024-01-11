@@ -6,7 +6,7 @@ public class IllegalIdException extends RuntimeException {
     public static final String ILLEGAL_COMMON_USER_ID_MESSAGE = "Неверно указан id пользователя";
     public static final String ILLEGAL_REVIEW_ID_MESSAGE = "Отзыва с таким id не существует. id = ";
     public static final String ILLEGAL_FILM_ID_MESSAGE = "Фильма с таким id не существует. id = ";
-    public static final String ILLEGAL_COMMON_ILM_ID_MESSAGE = "Неверно указан id фильма";
+    public static final String ILLEGAL_COMMON_FILM_ID_MESSAGE = "Неверно указан id фильма";
     public static final String ILLEGAL_REVIEW_ID_ADVICE = "Проверьте значение переданного id отзыва.";
     public static final String ILLEGAL_FILM_ID_ADVICE = "Проверьте значение переданного id фильма.";
     public static final String ILLEGAL_USER_ID_ADVICE = "Проверьте значение переданного id пользователя.";
