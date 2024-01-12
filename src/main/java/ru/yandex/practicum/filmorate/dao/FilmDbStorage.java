@@ -40,7 +40,6 @@ public class FilmDbStorage implements FilmStorage {
                     .usingGeneratedKeyColumns("film_id");
             Long filmId = insertFilm.executeAndReturnKey(filmToMap(film)).longValue();
             film.setId(filmId);
-            // связали id фильма и жанры:
             if (film.getGenres() != null) {
                 saveGenres(film);
                 sortGenres(film);
@@ -115,8 +114,8 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilmById(Long filmId) {
         if (checkIfFilmExists(filmId)) {
             Film film = jdbcTemplate.queryForObject(SQL_QUERY_GET_FILM_BY_ID, getFilmMapper(), filmId);
-                setGenreForFilm(film);
-                setDirectorsForFilm(film);
+            setGenreForFilm(film);
+            setDirectorsForFilm(film);
             return film;
         }
         log.error("фильм с id {} еще не добавлен.", filmId);
@@ -234,7 +233,7 @@ public class FilmDbStorage implements FilmStorage {
 
         // топ с фильтром по жанру {genreId} и году {year}:
         List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES
-                        + TOP_FILMS_WITH_GENRE_AND_YEAR_FILTER, getFilmMapper(), genreId, year, count);
+                + TOP_FILMS_WITH_GENRE_AND_YEAR_FILTER, getFilmMapper(), genreId, year, count);
         setGenreForFilms(films);
         setDirectorForFilms(films);
         return films;
@@ -262,7 +261,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private boolean checkIfDirectorExists(Long id) {
-        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DIRECTORS WHERE directors_id = ?",Integer.class,id);
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DIRECTORS WHERE directors_id = ?", Integer.class, id);
         if (result == 0) {
             log.error("режиссера с таким id {} нет", id);
             return false;
@@ -352,7 +351,7 @@ public class FilmDbStorage implements FilmStorage {
         return Integer.compare(director1.getId(), director2.getId());
     }
 
-    private void setGenreForFilms(List<Film> films) {
+    public void setGenreForFilms(List<Film> films) {
         Map<Long, List<FilmGenre>> filmGenreMap = getFilmGenreMap(getFilmsId(films));
         films.forEach(film -> film.setGenres(getGenresForFilm(film.getId(), filmGenreMap)));
         films.forEach(this::sortGenres);

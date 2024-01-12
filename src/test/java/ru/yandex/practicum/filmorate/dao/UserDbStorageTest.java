@@ -30,7 +30,7 @@ public class UserDbStorageTest {
     private User commonFriend;
 
     public void init() {
-        userStorage = new UserDbStorage(jdbcTemplate);
+        userStorage = new UserDbStorage(jdbcTemplate, new FilmDbStorage(jdbcTemplate));
         user = User.builder()
                 .email("testuser1@tset.com")
                 .login("test_user1_login")
@@ -73,7 +73,7 @@ public class UserDbStorageTest {
                 .email("updatetestuser1@test.com")
                 .login("update_test_user1_login")
                 .name("update_test_user1_name")
-                .birthday(LocalDate.of(2005, 5,5))
+                .birthday(LocalDate.of(2005, 5, 5))
                 .build();
 
         userStorage.updateUser(updateUser);
