@@ -242,4 +242,10 @@ public class SqlQuery {
 
     public static final String SQL_QUERY_DELETE_USER_BY_ID =
             "DELETE FROM USERS WHERE user_id = ?";
+
+    /*----Запросы для объектов Event (таблица event_feed)----*/
+    public static final String SQL_QUERY_GET_EVENT_FEED =
+            "SELECT * " +
+            "FROM event_feed " +
+            "WHERE user_id = ?;";
 }

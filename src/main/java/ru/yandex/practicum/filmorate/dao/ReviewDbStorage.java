@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.event.EventOperation;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.utility.Events;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,8 @@ public class ReviewDbStorage implements ReviewStorage {
             Long reviewId = insertReview.executeAndReturnKey(reviewToMap(review)).longValue();
             try {
                 review.setReviewId(reviewId);
+                // добавляем Event в БД:
+                Events.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.ADD, review.getUserId(), reviewId);
             } catch (NullPointerException e) {
                 throw new RuntimeException("null");
             }
@@ -75,8 +80,20 @@ public class ReviewDbStorage implements ReviewStorage {
                             "content = ?, " +
                             "is_positive = ? " +
                             "WHERE review_id = ?", review.getContent(), review.getIsPositive(), review.getReviewId());
+            // добавляем Event в БД:
+            Events.addEvent(jdbcTemplate,
+                    EventType.REVIEW,
+                    EventOperation.UPDATE,
+                    findReviewById(review.getReviewId()).getUserId(),
+                    review.getReviewId());
         } else if (!checkIfReviewExists(review.getReviewId()) && checkIfUserExists(review.getUserId()) && checkIfFilmExists(review.getFilmId())) {
             addReview(review);
+            // добавляем Event в БД:
+            Events.addEvent(jdbcTemplate,
+                    EventType.REVIEW,
+                    EventOperation.ADD,
+                    review.getUserId(),
+                    review.getReviewId());
         } else if (!checkIfUserExists(review.getUserId()) || !checkIfFilmExists(review.getFilmId())) {
             throw new IllegalIdException(ILLEGAL_REVIEW_ID_MESSAGE, ILLEGAL_REVIEW_ID_ADVICE);
         }
@@ -85,7 +102,11 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public String deleteReviewById(Long reviewId) {
+        // получаем объект Review перед удалением, чтобы перенести его данные в объект Event:
+        Review review = findReviewById(reviewId);
         jdbcTemplate.update("DELETE FROM REVIEWS WHERE review_id = ?", reviewId);
+        // добавляем Event в БД:
+        Events.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.REMOVE, review.getUserId(), reviewId);
         return "Review deleted";
     }
 
