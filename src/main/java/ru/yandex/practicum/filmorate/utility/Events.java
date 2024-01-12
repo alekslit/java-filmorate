@@ -14,7 +14,9 @@ import java.util.Map;
 /*---Утилитарный класс для методов объекта Event---*/
 public class Events {
 
-    private Events() {}
+    private Events() {
+
+    }
 
     // метод для добавления Event в БД:
     public static void addEvent(JdbcTemplate jdbcTemplate,
