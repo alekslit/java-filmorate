@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.Event;
 
 import java.util.List;
 
@@ -65,5 +66,10 @@ public class UserDbService implements UserService {
     @Override
     public List<Film> getRecommendations(Long id) {
         return userStorage.getRecommendations(id);
+    }
+
+    @Override
+    public List<Event> getEventFeed(Long userId) {
+        return userStorage.getEventFeed(userId);
     }
 }

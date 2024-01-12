@@ -11,6 +11,10 @@ import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.model.event.EventOperation;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.utility.Events;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -137,6 +141,8 @@ public class UserDbStorage implements UserStorage {
                     .withTableName("user_friendship")
                     .usingGeneratedKeyColumns("user_friendship_id");
             insertFriend.execute(userFriendsipToMap(id, friendId));
+            // добавляем Event в БД:
+            Events.addEvent(jdbcTemplate, EventType.FRIEND, EventOperation.ADD, id, friendId);
 
             return ADD_TO_FRIEND_MESSAGE + id + ", " + friendId;
         } else {
@@ -150,6 +156,8 @@ public class UserDbStorage implements UserStorage {
         if (checkIfUserExists(id) && checkIfUserExists(friendId)) {
             String sqlQuery = SQL_QUERY_REMOVE_USER_FROM_FRIENDS;
             jdbcTemplate.update(sqlQuery, id, friendId);
+            // добавляем Event в БД:
+            Events.addEvent(jdbcTemplate, EventType.FRIEND, EventOperation.REMOVE, id, friendId);
             return REMOVE_FROM_FRIEND_MESSAGE + id + ", " + friendId;
         } else {
             log.error("Неверно указаны id пользователей для удаления из друзей {}, {}", id, friendId);
@@ -274,5 +282,18 @@ public class UserDbStorage implements UserStorage {
             return false;
         }
         return true;
+    }
+
+    // получаем ленту событий пользователя:
+    @Override
+    public List<Event> getEventFeed(Long userId) {
+        if (checkIfUserExists(userId)) {
+            String sqlQuery = SQL_QUERY_GET_EVENT_FEED;
+            return jdbcTemplate.query(sqlQuery, Events::mapRowToEvent, userId);
+        } else {
+            log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + userId,
+                    IllegalIdException.class.getSimpleName());
+            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + userId, ILLEGAL_USER_ID_ADVICE);
+        }
     }
 }

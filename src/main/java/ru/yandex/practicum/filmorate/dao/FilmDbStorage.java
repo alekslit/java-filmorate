@@ -10,6 +10,9 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.event.EventOperation;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.utility.Events;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -177,6 +180,8 @@ public class FilmDbStorage implements FilmStorage {
     public String addLikeToFilm(Long id, Long userId) {
         if (checkIfFilmExists(id) && checkIfUserExists(userId)) {
             jdbcTemplate.update(SQL_QUERY_FILM_ADD_LIKE, id, userId);
+            // добавляем Event в БД:
+            Events.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.ADD, userId, id);
         } else {
             log.error("Неверно указаны параметры запроса {}, {}", id, userId);
             throw new IllegalIdException(ILLEGAL_COMMON_FILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
@@ -188,6 +193,8 @@ public class FilmDbStorage implements FilmStorage {
     public String removeLikeFromFilm(Long id, Long userId) {
         if (checkIfFilmExists(id) && checkIfUserExists(userId)) {
             jdbcTemplate.update(SQL_QUERY_REMOVE_LIKE_FROM_FILM, userId, id);
+            // добавляем Event в БД:
+            Events.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.REMOVE, userId, id);
         } else {
             log.error("Неверно указаны данные для удаления лайка: userId {}, id {}", userId, id);
             throw new IllegalIdException(ILLEGAL_COMMON_FILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);

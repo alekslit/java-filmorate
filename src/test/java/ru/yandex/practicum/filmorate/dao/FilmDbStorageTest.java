@@ -11,8 +11,6 @@ import ru.yandex.practicum.filmorate.dao.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
-import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;

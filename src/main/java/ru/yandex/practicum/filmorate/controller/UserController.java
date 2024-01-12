@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -106,5 +107,12 @@ public class UserController {
             throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
                     PATH_VARIABLE_ID_ADVICE);
         }
+    }
+
+    // получаем ленту событий пользователя:
+    @GetMapping("/{id}/feed")
+    public List<Event> getEventFeed(@PathVariable Long id) {
+        checkId(id, PATH_VARIABLE_ID);
+        return userService.getEventFeed(id);
     }
 }
