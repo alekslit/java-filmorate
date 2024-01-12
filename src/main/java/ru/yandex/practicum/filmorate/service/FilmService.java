@@ -25,5 +25,11 @@ public interface FilmService {
 
     List<Film> getFilmsByDirectorSortedByLikesOrYear(Long directorId, boolean sortByLikes);
 
+    List<Film> searchFilmsByDirector(String query);
+
+    List<Film> searchFilmsByTitle(String query);
+
+    List<Film> searchFilmsByTitleAndDirector(String query);
+
     List<Film> getTopFilmsForLikesWithYearAndGenreFilter(Integer count, Long genreId, Integer year);
 }

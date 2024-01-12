@@ -13,8 +13,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 import java.util.List;
 import java.util.Map;
 
-import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_FILM_ID_ADVICE;
-import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_FILM_ID_MESSAGE;
+import static ru.yandex.practicum.filmorate.exception.IllegalIdException.*;
 
 @Slf4j
 @Repository
