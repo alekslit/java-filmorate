@@ -26,20 +26,6 @@ import static ru.yandex.practicum.filmorate.query.SqlQuery.*;
 public class DirectorDbStorage implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    /*---Вспомогательные методы---*/
-    private Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {
-        return Director.builder()
-                .id(resultSet.getInt("directors_id"))
-                .name(resultSet.getString("name"))
-                .build();
-    }
-
-    private static Map<String, Object> directorToMap(Director director) {
-        return Map.of(
-                "directors_id", director.getId(),
-                "name", director.getName());
-    }
-
     /*---Основные методы---*/
     @Override
     public List<Director> getAllDirectors() {
@@ -49,12 +35,12 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Optional<Director> getByIdDirector(Integer id) {
+    public Director getByIdDirector(Integer id) {
         try {
             String query = SQL_QUERY_GET_BY_ID_DIRECTOR;
             log.info("SELECT request to DB Directors by id=" + id);
 
-            return Optional.ofNullable(jdbcTemplate.queryForObject(query, this::mapRowToDirector, id));
+            return jdbcTemplate.queryForObject(query, this::mapRowToDirector, id);
         } catch (EmptyResultDataAccessException exception) {
             log.debug("{}: " + INVALID_DATA_BASE_QUERY_MESSAGE + " Размер ответа на запрос: "
                     + exception.getExpectedSize(), IllegalIdException.class.getSimpleName());
@@ -76,7 +62,7 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Director updateDirector(Director director) {
-        if (getByIdDirector(director.getId()).isPresent()) {
+        if (getByIdDirector(director.getId()) != null) {
             String query = SQL_QUERY_UPDATE_DIRECTOR;
             log.info("UPDATE request to DB Directors: " + director.getName());
             jdbcTemplate.update(query, director.getName(), director.getId());
@@ -99,5 +85,19 @@ public class DirectorDbStorage implements DirectorStorage {
 
         // Обновление последующих идентификаторов режиссеров
         jdbcTemplate.update(updateQuery, id);
+    }
+
+    /*---Вспомогательные методы---*/
+    private Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {
+        return Director.builder()
+                .id(resultSet.getInt("directors_id"))
+                .name(resultSet.getString("name"))
+                .build();
+    }
+
+    private static Map<String, Object> directorToMap(Director director) {
+        return Map.of(
+                "directors_id", director.getId(),
+                "name", director.getName());
     }
 }

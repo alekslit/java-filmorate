@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SortBy;
 
 import java.util.List;
 
@@ -67,18 +68,18 @@ public class FilmDbService implements FilmService {
     }
 
     @Override
-    public List<Film> searchFilmsByDirector(String query) {
-        return filmStorage.searchFilmsByDirector(query);
-    }
-
-    @Override
-    public List<Film> searchFilmsByTitle(String query) {
-        return filmStorage.searchFilmsByTitle(query);
-    }
-
-    @Override
-    public List<Film> searchFilmsByTitleAndDirector(String query) {
-        return filmStorage.searchFilmsByTitleAndDirector(query);
+    public List<Film> searchFilmsByTitleOrDirector(String query, SortBy sortBy) {
+        switch (sortBy) {
+            case DIRECTOR:
+                return filmStorage.searchFilmsByDirector(query);
+            case TITLE:
+                return filmStorage.searchFilmsByTitle(query);
+            case DIRECTOR_TITLE:
+            case TITLE_DIRECTOR:
+                return filmStorage.searchFilmsByTitleAndDirector(query);
+            default:
+                throw new IllegalArgumentException("Invalid 'by' parameter. Supported values are 'director', 'title', 'director,title' and 'title,director'");
+        }
     }
 
     @Override

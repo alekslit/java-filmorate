@@ -11,13 +11,13 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class DirectorDbService {
-    DirectorStorage directorStorage;
+    private final DirectorStorage directorStorage;
 
     public List<Director> getAllDirectors() {
         return directorStorage.getAllDirectors();
     }
 
-    public Optional<Director> getByIdDirector(Integer id) {
+    public Director getByIdDirector(Integer id) {
         return directorStorage.getByIdDirector(id);
     }
 

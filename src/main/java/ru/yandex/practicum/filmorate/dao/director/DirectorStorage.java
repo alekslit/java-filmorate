@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface DirectorStorage {
     List<Director> getAllDirectors();
 
-    Optional<Director> getByIdDirector(Integer id);
+    Director getByIdDirector(Integer id);
 
     Director addDirector(Director director);
 

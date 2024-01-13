@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SortBy;
 
 import java.util.List;
 
@@ -24,12 +25,7 @@ public interface FilmService {
     List<Film> getCommonFilms(Long userId, Long friendId);
 
     List<Film> getFilmsByDirectorSortedByLikesOrYear(Long directorId, boolean sortByLikes);
-
-    List<Film> searchFilmsByDirector(String query);
-
-    List<Film> searchFilmsByTitle(String query);
-
-    List<Film> searchFilmsByTitleAndDirector(String query);
+    List<Film> searchFilmsByTitleOrDirector(String query, SortBy sortBy);
 
     List<Film> getTopFilmsForLikesWithYearAndGenreFilter(Integer count, Long genreId, Integer year);
 }
