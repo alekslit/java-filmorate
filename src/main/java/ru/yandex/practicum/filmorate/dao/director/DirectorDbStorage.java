@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException;
-import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.director.Director;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.GENRE_INVALID_DATA_BASE_QUERY_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.INVALID_DATA_BASE_QUERY_MESSAGE;
+import static ru.yandex.practicum.filmorate.query.SqlQuery.*;
 
 @Repository
 @Slf4j
@@ -25,6 +26,7 @@ import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryExcept
 public class DirectorDbStorage implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
 
+    /*---Вспомогательные методы---*/
     private Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {
         return Director.builder()
                 .id(resultSet.getInt("directors_id"))
@@ -38,9 +40,10 @@ public class DirectorDbStorage implements DirectorStorage {
                 "name", director.getName());
     }
 
+    /*---Основные методы---*/
     @Override
     public List<Director> getAllDirectors() {
-        String query = "SELECT * FROM directors;";
+        String query = SQL_QUERY_GET_ALL_DIRECTORS;
         log.info("SELECT all Directors from DB");
         return jdbcTemplate.query(query, this::mapRowToDirector);
     }
@@ -48,11 +51,10 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Optional<Director> getByIdDirector(Integer id) {
         try {
-            String query = "SELECT * FROM directors WHERE directors_id = ?;";
+            String query = SQL_QUERY_GET_BY_ID_DIRECTOR;
             log.info("SELECT request to DB Directors by id=" + id);
 
             return Optional.ofNullable(jdbcTemplate.queryForObject(query, this::mapRowToDirector, id));
-
         } catch (EmptyResultDataAccessException exception) {
             log.debug("{}: " + INVALID_DATA_BASE_QUERY_MESSAGE + " Размер ответа на запрос: "
                     + exception.getExpectedSize(), IllegalIdException.class.getSimpleName());
@@ -75,7 +77,7 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Director updateDirector(Director director) {
         if (getByIdDirector(director.getId()).isPresent()) {
-            String query = "UPDATE directors SET name = ? WHERE directors_id = ?;";
+            String query = SQL_QUERY_UPDATE_DIRECTOR;
             log.info("UPDATE request to DB Directors: " + director.getName());
             jdbcTemplate.update(query, director.getName(), director.getId());
         }
@@ -85,14 +87,17 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public void deleteDirector(Integer id) {
-        String deleteQuery = "DELETE FROM directors WHERE directors_id = ?;";
-        String updateQuery = "UPDATE directors SET directors_id = directors_id - 1 WHERE directors_id > ?;";
+        String deleteQuery = "DELETE " +
+                             "FROM directors " +
+                             "WHERE directors_id = ?;";
+        String updateQuery = "UPDATE directors " +
+                             "SET directors_id = directors_id - 1 " +
+                             "WHERE directors_id > ?;";
 
         // Удаление режиссера
         jdbcTemplate.update(deleteQuery, id);
 
         // Обновление последующих идентификаторов режиссеров
         jdbcTemplate.update(updateQuery, id);
-
     }
 }

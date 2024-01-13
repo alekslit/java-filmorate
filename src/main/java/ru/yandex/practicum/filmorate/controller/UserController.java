@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.event.Event;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -99,6 +99,13 @@ public class UserController {
         return userService.getRecommendations(id);
     }
 
+    // получаем ленту событий пользователя:
+    @GetMapping("/{id}/feed")
+    public List<Event> getEventFeed(@PathVariable Long id) {
+        checkId(id, PATH_VARIABLE_ID);
+        return userService.getEventFeed(id);
+    }
+
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {
         if (id == null || id <= 0) {
@@ -107,12 +114,5 @@ public class UserController {
             throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
                     PATH_VARIABLE_ID_ADVICE);
         }
-    }
-
-    // получаем ленту событий пользователя:
-    @GetMapping("/{id}/feed")
-    public List<Event> getEventFeed(@PathVariable Long id) {
-        checkId(id, PATH_VARIABLE_ID);
-        return userService.getEventFeed(id);
     }
 }

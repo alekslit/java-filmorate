@@ -87,7 +87,7 @@ public class ErrorHandler {
         return errorResponse;
     }
 
-    //*---Обработчики для статуса 500 (Internal server error)---*//*
+    /*---Обработчики для статуса 500 (Internal server error)---*/
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {

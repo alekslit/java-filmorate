@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.dao.user;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -6,24 +6,18 @@ import ru.yandex.practicum.filmorate.model.event.Event;
 
 import java.util.List;
 
-public interface UserService {
+public interface UserStorage {
     User addUser(User user);
 
     User updateUser(User user);
 
     List<User> getAllUsers();
 
-    User getUserById(Long id);
+    User checkName(User user);
 
-    void deleteUserById(Long id);
+    User getUserById(Long userId);
 
-    String addUserToFriends(Long id, Long friendId);
-
-    String removeUserFromFriends(Long id, Long friendId);
-
-    List<User> getAllFriendsList(Long id);
-
-    List<User> getCommonFriends(Long id, Long otherId);
+    void deleteUserById(Long userId);
 
     List<Film> getRecommendations(Long id);
 

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,6 +6,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException;
@@ -38,7 +39,6 @@ public class UserDbStorage implements UserStorage {
     private static final String REMOVE_FROM_FRIEND_MESSAGE = "Пользователи успешно удалены из друзей. Их id: ";
 
     private final JdbcTemplate jdbcTemplate;
-
     private final FilmDbStorage filmDbStorage;
 
     @Autowired
@@ -147,7 +147,7 @@ public class UserDbStorage implements UserStorage {
             return ADD_TO_FRIEND_MESSAGE + id + ", " + friendId;
         } else {
             log.error("Неверно указаны id пользователей для добавления в друзья {}, {}", id, friendId);
-            throw new IllegalIdException(ILLEGAL_COMMON_USER_ID_MESSAGE, ILLEGAL_USER_ID_ADVICE);
+            throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE + id + ", " + friendId, ILLEGAL_OBJECTS_ID_ADVICE);
         }
     }
 
@@ -161,7 +161,7 @@ public class UserDbStorage implements UserStorage {
             return REMOVE_FROM_FRIEND_MESSAGE + id + ", " + friendId;
         } else {
             log.error("Неверно указаны id пользователей для удаления из друзей {}, {}", id, friendId);
-            throw new IllegalIdException(ILLEGAL_COMMON_USER_ID_MESSAGE, ILLEGAL_USER_ID_ADVICE);
+            throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE + id + ", " + friendId, ILLEGAL_OBJECTS_ID_ADVICE);
         }
     }
 
@@ -184,7 +184,7 @@ public class UserDbStorage implements UserStorage {
             return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id, otherId);
         } else {
             log.error("Неверно указаны id пользователей для отображения общих друзей {}, {}", id, otherId);
-            throw new IllegalIdException(ILLEGAL_COMMON_USER_ID_MESSAGE, ILLEGAL_USER_ID_ADVICE);
+            throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE, ILLEGAL_OBJECTS_ID_ADVICE);
         }
     }
 
@@ -198,8 +198,8 @@ public class UserDbStorage implements UserStorage {
             try {
                 userFilmsId = jdbcTemplate.queryForList(
                         "SELECT film_id " +
-                                "FROM film_likes " +
-                                "WHERE user_id = ?;", Long.class, id);
+                        "FROM film_likes " +
+                        "WHERE user_id = ?;", Long.class, id);
 
                 userFilmsIdString = userFilmsId.stream()
                         .map(String::valueOf)
@@ -207,12 +207,12 @@ public class UserDbStorage implements UserStorage {
 
                 anotherUserId = jdbcTemplate.queryForObject(
                         "SELECT user_id " +
-                                "FROM film_likes " +
-                                "WHERE NOT user_id = ? " +
-                                "AND film_id IN (" + userFilmsIdString + ") " +
-                                "GROUP BY user_id " +
-                                "ORDER BY COUNT(film_id) DESC " +
-                                "LIMIT 1;", Long.class, id);
+                        "FROM film_likes " +
+                        "WHERE NOT user_id = ? " +
+                          "AND film_id IN (" + userFilmsIdString + ") " +
+                        "GROUP BY user_id " +
+                        "ORDER BY COUNT(film_id) DESC " +
+                        "LIMIT 1;", Long.class, id);
             } catch (EmptyResultDataAccessException e) {
                 return Collections.emptyList();
             }
@@ -224,18 +224,29 @@ public class UserDbStorage implements UserStorage {
                             "f.duration, " +
                             "mp.mpa_rating_id, " +
                             "mp.name AS mpa_name " +
-                            "FROM FILM_LIKES AS fl " +
-                            "JOIN FILMS AS f ON fl.film_id = f.film_id " +
-                            "JOIN mpa_rating AS mp ON f.mpa_rating_id = mp.mpa_rating_id " +
-                            "WHERE fl.film_id NOT IN (" + userFilmsIdString + ") " +
-                            "AND user_id = ?;", filmDbStorage.getFilmMapper(), anotherUserId);
+                    "FROM FILM_LIKES AS fl " +
+                    "JOIN FILMS AS f ON fl.film_id = f.film_id " +
+                    "JOIN mpa_rating AS mp ON f.mpa_rating_id = mp.mpa_rating_id " +
+                    "WHERE fl.film_id NOT IN (" + userFilmsIdString + ") " +
+                      "AND user_id = ?;", filmDbStorage.getFilmMapper(), anotherUserId);
             filmDbStorage.setGenreForFilms(films);
         }
         return films;
     }
 
-    /*-----Вспомогательные методы-----*/
+    // получаем ленту событий пользователя:
+    @Override
+    public List<Event> getEventFeed(Long userId) {
+        if (checkIfUserExists(userId)) {
+            String sqlQuery = SQL_QUERY_GET_EVENT_FEED;
+            return jdbcTemplate.query(sqlQuery, Events::mapRowToEvent, userId);
+        } else {
+            log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + userId, IllegalIdException.class.getSimpleName());
+            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + userId, ILLEGAL_USER_ID_ADVICE);
+        }
+    }
 
+    /*-----Вспомогательные методы-----*/
     private static Map<String, Object> userToMap(User user) {
         return Map.of(
                 "email", user.getEmail(),
@@ -275,25 +286,13 @@ public class UserDbStorage implements UserStorage {
     }
 
     private boolean checkIfUserExists(Long id) {
-        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS WHERE user_id = ?",
-                Integer.class, id);
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
+                                                     "FROM USERS " +
+                                                     "WHERE user_id = ?", Integer.class, id);
         if (result == 0) {
             log.error("Пользователя с таким id {} нет", id);
             return false;
         }
         return true;
-    }
-
-    // получаем ленту событий пользователя:
-    @Override
-    public List<Event> getEventFeed(Long userId) {
-        if (checkIfUserExists(userId)) {
-            String sqlQuery = SQL_QUERY_GET_EVENT_FEED;
-            return jdbcTemplate.query(sqlQuery, Events::mapRowToEvent, userId);
-        } else {
-            log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + userId,
-                    IllegalIdException.class.getSimpleName());
-            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + userId, ILLEGAL_USER_ID_ADVICE);
-        }
     }
 }

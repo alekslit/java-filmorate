@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +9,14 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.director.Director;
+import ru.yandex.practicum.filmorate.model.director.FilmDirector;
 import ru.yandex.practicum.filmorate.model.event.EventOperation;
 import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.genre.FilmGenre;
+import ru.yandex.practicum.filmorate.model.genre.Genre;
 import ru.yandex.practicum.filmorate.utility.Events;
 
 import java.sql.PreparedStatement;
@@ -77,7 +82,9 @@ public class FilmDbStorage implements FilmStorage {
                     film.getMpa().getId(),
                     film.getId());
             if (!savedFilm.getGenres().equals(film.getGenres())) {
-                jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?", film.getId());
+                jdbcTemplate.update("DELETE " +
+                                    "FROM film_genres " +
+                                    "WHERE film_id = ?", film.getId());
                 if (film.getGenres() != null) {
                     saveGenres(film);
                     sortGenres(film);
@@ -88,7 +95,9 @@ public class FilmDbStorage implements FilmStorage {
                 }
             }
             if (!savedFilm.getDirectors().equals(film.getDirectors())) {
-                jdbcTemplate.update("DELETE FROM film_directors WHERE film_id = ?", film.getId());
+                jdbcTemplate.update("DELETE " +
+                                    "FROM film_directors " +
+                                    "WHERE film_id = ?", film.getId());
                 if (film.getDirectors() != null) {
                     saveDirectors(film);
                     sortDirectors(film);
@@ -105,8 +114,7 @@ public class FilmDbStorage implements FilmStorage {
     /*---Получить список всех Film---*/
     @Override
     public List<Film> getAllFilms() {
-        List<Film> films = jdbcTemplate.query(
-                SQL_QUERY_GET_ALL_FILMS, getFilmMapper());
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS, getFilmMapper());
         setGenreForFilms(films);
         setDirectorForFilms(films);
         return films;
@@ -128,20 +136,23 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getFilmsByDirectorSortedByLikesOrYear(Long directorId, boolean sortByLikes) {
         if (checkIfDirectorExists(directorId)) {
-            String orderByClause = sortByLikes ? "ORDER BY COUNT(fl.film_likes_id) ASC;" : "ORDER BY f.release_date ASC;";
-            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS_BY_DIRECTOR + orderByClause, getFilmMapper(), directorId);
+            String orderByClause = sortByLikes ? "ORDER BY COUNT(fl.film_likes_id) ASC;" :
+                    "ORDER BY f.release_date ASC;";
+            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS_BY_DIRECTOR + orderByClause,
+                    getFilmMapper(), directorId);
             setGenreForFilms(films);
             setDirectorForFilms(films);
             return films;
         }
         log.error("режиссер с id {} еще не добавлен.", directorId);
-        throw new IllegalIdException(ILLEGAL_FILM_ID_MESSAGE + directorId, ILLEGAL_FILM_ID_ADVICE);
+        throw new IllegalIdException(ILLEGAL_DIRECTOR_ID_MESSAGE + directorId, ILLEGAL_DIRECTOR_ID_ADVICE);
     }
 
     @Override
     public List<Film> searchFilmsByDirector(String query) {
         String searchQuery = "%" + query + "%";
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_DIRECTOR, getFilmMapper(), searchQuery.toUpperCase());
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_DIRECTOR, getFilmMapper(),
+                searchQuery.toUpperCase());
         setGenreForFilms(films);
         setDirectorForFilms(films);
         return films;
@@ -150,7 +161,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> searchFilmsByTitle(String query) {
         String searchQuery = "%" + query + "%";
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE, getFilmMapper(), searchQuery.toUpperCase());
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE, getFilmMapper(),
+                searchQuery.toUpperCase());
         setGenreForFilms(films);
         setDirectorForFilms(films);
         return films;
@@ -159,7 +171,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> searchFilmsByTitleAndDirector(String query) {
         String searchQuery = "%" + query + "%";
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE_AND_DIRECTOR, getFilmMapper(), searchQuery.toUpperCase(), searchQuery.toUpperCase());
+        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE_AND_DIRECTOR, getFilmMapper(),
+                searchQuery.toUpperCase(), searchQuery.toUpperCase());
         setGenreForFilms(films);
         setDirectorForFilms(films);
         return films;
@@ -183,8 +196,9 @@ public class FilmDbStorage implements FilmStorage {
             // добавляем Event в БД:
             Events.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.ADD, userId, id);
         } else {
-            log.error("Неверно указаны параметры запроса {}, {}", id, userId);
-            throw new IllegalIdException(ILLEGAL_COMMON_FILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
+            log.debug("{}: " + ILLEGAL_OBJECTS_ID_MESSAGE + id + ", " + userId,
+                    IllegalIdException.class.getSimpleName());
+            throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE, ILLEGAL_OBJECTS_ID_ADVICE);
         }
         return String.format("Пользователь с id: %d, поставил лайк фильму с id: %d.", userId, id);
     }
@@ -196,8 +210,9 @@ public class FilmDbStorage implements FilmStorage {
             // добавляем Event в БД:
             Events.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.REMOVE, userId, id);
         } else {
-            log.error("Неверно указаны данные для удаления лайка: userId {}, id {}", userId, id);
-            throw new IllegalIdException(ILLEGAL_COMMON_FILM_ID_MESSAGE, ILLEGAL_FILM_ID_ADVICE);
+            log.debug("{}: " + ILLEGAL_OBJECTS_ID_MESSAGE + id + ", " + userId,
+                    IllegalIdException.class.getSimpleName());
+            throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE, ILLEGAL_OBJECTS_ID_ADVICE);
         }
         return String.format("Пользователь с id: %d, удалил свой лайк фильму с id: %d.", userId, id);
     }
@@ -248,7 +263,9 @@ public class FilmDbStorage implements FilmStorage {
 
     /*------Вспомогательные методы------*/
     private boolean checkIfFilmExists(Long id) {
-        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM FILMS WHERE film_id = ?",
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
+                                                     "FROM FILMS " +
+                                                     "WHERE film_id = ?;",
                 Integer.class, id);
         if (result == 0) {
             log.error("фильм с id {} еще не добавлен.", id);
@@ -258,7 +275,9 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private boolean checkIfUserExists(Long id) {
-        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS WHERE user_id = ?",
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
+                                                     "FROM USERS " +
+                                                     "WHERE user_id = ?;",
                 Integer.class, id);
         if (result == 0) {
             log.error("Пользователя с таким id {} нет", id);
@@ -268,7 +287,9 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private boolean checkIfDirectorExists(Long id) {
-        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM DIRECTORS WHERE directors_id = ?", Integer.class, id);
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
+                                                     "FROM DIRECTORS " +
+                                                     "WHERE directors_id = ?;", Integer.class, id);
         if (result == 0) {
             log.error("режиссера с таким id {} нет", id);
             return false;
@@ -302,7 +323,8 @@ public class FilmDbStorage implements FilmStorage {
 
     public void saveGenres(Film film) {
         List<Genre> genres = new ArrayList<>(film.getGenres());
-        jdbcTemplate.batchUpdate("INSERT INTO film_genres(film_id, genre_id) VALUES (?, ?);",
+        jdbcTemplate.batchUpdate("INSERT INTO film_genres(film_id, genre_id) " +
+                                 "VALUES (?, ?);",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -320,7 +342,8 @@ public class FilmDbStorage implements FilmStorage {
 
     private void saveDirectors(Film film) {
         List<Director> directors = new ArrayList<>(film.getDirectors());
-        jdbcTemplate.batchUpdate("INSERT INTO film_directors(film_id, directors_id) VALUES (?, ?);",
+        jdbcTemplate.batchUpdate("INSERT INTO film_directors(film_id, directors_id) " +
+                                 "VALUES (?, ?);",
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -388,9 +411,9 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.joining(",", " ", " "));
         return jdbcTemplate.query(
                 "SELECT film_id, fg.genre_id, name " +
-                        "FROM film_genres AS fg " +
-                        "JOIN GENRE AS g ON fg.genre_id = g.genre_id " +
-                        "WHERE fg.film_id IN(" + filmsIdString + ")", getFilmGenreMapper());
+                "FROM film_genres AS fg " +
+                "JOIN GENRE AS g ON fg.genre_id = g.genre_id " +
+                "WHERE fg.film_id IN(" + filmsIdString + ");", getFilmGenreMapper());
     }
 
     private List<FilmDirector> getDirectors(List<Long> filmsId) {
@@ -399,9 +422,9 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.joining(",", " ", " "));
         return jdbcTemplate.query(
                 "SELECT film_id, fd.directors_id, name " +
-                        "FROM film_directors AS fd " +
-                        "JOIN directors AS d ON fd.directors_id = d.directors_id " +
-                        "WHERE fd.film_id IN(" + filmsIdString + ")", getFilmDirectorMapper());
+                "FROM film_directors AS fd " +
+                "JOIN directors AS d ON fd.directors_id = d.directors_id " +
+                "WHERE fd.film_id IN(" + filmsIdString + ");", getFilmDirectorMapper());
     }
 
     private RowMapper<FilmGenre> getFilmGenreMapper() {
@@ -451,7 +474,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private Set<Director> getDirectorsForFilm(Long filmId, Map<Long, List<FilmDirector>> resultMapForFilm) {
         if (resultMapForFilm.get(filmId) == null) {
-            log.error("Для фильма с id {} не указано жанров", filmId);
+            log.error("Для фильма с id {} не указано режиссёров", filmId);
             return Collections.emptySet();
         }
         return resultMapForFilm.get(filmId).stream()
@@ -462,7 +485,7 @@ public class FilmDbStorage implements FilmStorage {
     public void setDirectorsForFilm(Film film) {
         List<FilmDirector> filmDirectorList = getDirectors(Collections.singletonList(film.getId()));
         if (filmDirectorList.isEmpty()) {
-            log.error("Для фильма с id {} не указано жанров", film.getId());
+            log.error("Для фильма с id {} не указано режиссёров", film.getId());
             film.setDirectors(Collections.emptySet());
         } else {
             film.setDirectors(filmDirectorList.stream()

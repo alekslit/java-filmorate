@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.service.ReviewDbService;
+import ru.yandex.practicum.filmorate.service.review.ReviewDbService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -13,7 +13,6 @@ import java.util.List;
 @RequestMapping("/reviews")
 @Slf4j
 public class ReviewController {
-
     private final ReviewDbService reviewDbService;
 
     @Autowired
@@ -42,7 +41,8 @@ public class ReviewController {
     }
 
     @GetMapping
-    public List<Review> getReviewForFilmOrAll(@RequestParam(required = false) Long filmId, @RequestParam(defaultValue = "10") Integer count) {
+    public List<Review> getReviewForFilmOrAll(@RequestParam(required = false) Long filmId,
+                                              @RequestParam(defaultValue = "10") Integer count) {
         return reviewDbService.findAllReviews(filmId, count);
     }
 
@@ -69,5 +69,4 @@ public class ReviewController {
     public String removeDislikeFromReview(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
         return reviewDbService.removeDislikeFromReview(id, userId);
     }
-
 }

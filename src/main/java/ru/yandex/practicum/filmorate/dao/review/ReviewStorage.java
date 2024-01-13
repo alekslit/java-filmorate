@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.review;
 
 import ru.yandex.practicum.filmorate.model.Review;
 

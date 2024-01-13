@@ -38,8 +38,7 @@ public class MpaDbStorage {
         } catch (EmptyResultDataAccessException exception) {
             log.debug("{}: " + INVALID_DATA_BASE_QUERY_MESSAGE + " Размер ответа на запрос: "
                     + exception.getExpectedSize(), IllegalIdException.class.getSimpleName());
-            throw new InvalidDataBaseQueryException(INVALID_DATA_BASE_QUERY_MESSAGE,
-                    exception.getExpectedSize(),
+            throw new InvalidDataBaseQueryException(INVALID_DATA_BASE_QUERY_MESSAGE, exception.getExpectedSize(),
                     MPA_INVALID_DATA_BASE_QUERY_ADVICE);
         }
     }

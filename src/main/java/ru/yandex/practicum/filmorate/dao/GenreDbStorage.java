@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException;
-import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.genre.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,8 +38,7 @@ public class GenreDbStorage {
         } catch (EmptyResultDataAccessException exception) {
             log.debug("{}: " + INVALID_DATA_BASE_QUERY_MESSAGE + " Размер ответа на запрос: "
                     + exception.getExpectedSize(), IllegalIdException.class.getSimpleName());
-            throw new InvalidDataBaseQueryException(INVALID_DATA_BASE_QUERY_MESSAGE,
-                    exception.getExpectedSize(),
+            throw new InvalidDataBaseQueryException(INVALID_DATA_BASE_QUERY_MESSAGE, exception.getExpectedSize(),
                     GENRE_INVALID_DATA_BASE_QUERY_ADVICE);
         }
     }

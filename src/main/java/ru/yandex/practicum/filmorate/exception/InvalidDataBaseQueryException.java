@@ -6,8 +6,6 @@ public class InvalidDataBaseQueryException extends EmptyResultDataAccessExceptio
     public static final String INVALID_DATA_BASE_QUERY_MESSAGE = "Не корректный ответ на запрос к базе данных.";
     public static final String USER_INVALID_DATA_BASE_QUERY_ADVICE = "Проверьте корректность введённых данных. " +
             "База данных присылает пустой ответ на ваш запрос. Возможно вы ввели несуществуюший id пользователя.";
-    public static final String FILM_INVALID_DATA_BASE_QUERY_ADVICE = "Проверьте корректность введённых данных. " +
-            "База данных присылает пустой ответ на ваш запрос. Возможно вы ввели несуществуюший id фильма.";
     public static final String GENRE_INVALID_DATA_BASE_QUERY_ADVICE = "Проверьте корректность введённых данных. " +
             "База данных присылает пустой ответ на ваш запрос. Возможно вы ввели несуществуюший id жанра.";
     public static final String MPA_INVALID_DATA_BASE_QUERY_ADVICE = "Проверьте корректность введённых данных. " +

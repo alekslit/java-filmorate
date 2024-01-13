@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -79,13 +79,14 @@ public class FilmController {
 
     // получаем список топ фильмов по количеству лайков в размере {count}:
     @GetMapping("/popular")
-    public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10", required = false) Integer count,
-                                          @RequestParam(defaultValue = "0", required = false) Long genreId,
-                                          @RequestParam(defaultValue = "0", required = false) Integer year) {
+    public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10") Integer count,
+                                          @RequestParam(defaultValue = "0") Long genreId,
+                                          @RequestParam(defaultValue = "0") Integer year) {
         if (count <= 0) {
-            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE +
-                    REQUEST_PARAM_COUNT + " = " + count, IncorrectRequestParameterException.class.getSimpleName());
-            throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT, REQUEST_PARAMETER_COUNT_ADVICE);
+            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT,
+                    IncorrectRequestParameterException.class.getSimpleName());
+            throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT,
+                    REQUEST_PARAMETER_COUNT_ADVICE);
         }
 
         // обычный топ фильмов:
@@ -111,7 +112,8 @@ public class FilmController {
     }
 
     @GetMapping("/search")
-    public List<Film> searchFilms(@RequestParam("query") @NonNull String query, @RequestParam("by") @NonNull String by) {
+    public List<Film> searchFilms(@RequestParam("query") @NonNull String query,
+                                  @RequestParam("by") @NonNull String by) {
         if ("director".equalsIgnoreCase(by)) {
             return filmService.searchFilmsByDirector(query);
         } else if ("title".equalsIgnoreCase(by)) {
@@ -127,8 +129,10 @@ public class FilmController {
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {
         if (id == null || id <= 0) {
-            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id, IncorrectPathVariableException.class.getSimpleName());
-            throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable, PATH_VARIABLE_ID_ADVICE);
+            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id,
+                    IncorrectPathVariableException.class.getSimpleName());
+            throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
+                    PATH_VARIABLE_ID_ADVICE);
         }
     }
 }
