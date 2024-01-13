@@ -84,7 +84,7 @@ public class FilmDbStorage implements FilmStorage {
             if (!savedFilm.getGenres().equals(film.getGenres())) {
                 jdbcTemplate.update("DELETE " +
                                     "FROM film_genres " +
-                                    "WHERE film_id = ?", film.getId());
+                                    "WHERE film_id = ?;", film.getId());
                 if (film.getGenres() != null) {
                     saveGenres(film);
                     sortGenres(film);
@@ -97,10 +97,14 @@ public class FilmDbStorage implements FilmStorage {
             if (!savedFilm.getDirectors().equals(film.getDirectors())) {
                 jdbcTemplate.update("DELETE " +
                                     "FROM film_directors " +
-                                    "WHERE film_id = ?", film.getId());
+                                    "WHERE film_id = ?;", film.getId());
                 if (film.getDirectors() != null) {
                     saveDirectors(film);
                     sortDirectors(film);
+                } else {
+                film = film.toBuilder()
+                        .directors(new HashSet<>())
+                        .build();
                 }
             }
             log.debug("Обновлена информация о фильме: " + film.getName() + ", с id = " + film.getId());
