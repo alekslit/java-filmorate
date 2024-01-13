@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.converters;
 
 import org.springframework.core.convert.converter.Converter;
 import ru.yandex.practicum.filmorate.model.SortBy;
-
 public class SortByConverter implements Converter<String, SortBy> {
     @Override
     public SortBy convert(String source) {
