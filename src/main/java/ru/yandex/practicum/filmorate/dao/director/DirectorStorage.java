@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.dao.director;
 import ru.yandex.practicum.filmorate.model.director.Director;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface DirectorStorage {
     List<Director> getAllDirectors();
