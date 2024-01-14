@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.service.DirectorDbService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
