@@ -14,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.GENRE_INVALID_DATA_BASE_QUERY_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.INVALID_DATA_BASE_QUERY_MESSAGE;
