@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.service.event.EventService;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import javax.validation.Valid;
@@ -20,10 +21,12 @@ import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableExcep
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    private final EventService eventService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, EventService eventService) {
         this.userService = userService;
+        this.eventService = eventService;
     }
 
     // создание User:
@@ -103,7 +106,7 @@ public class UserController {
     @GetMapping("/{id}/feed")
     public List<Event> getEventFeed(@PathVariable Long id) {
         checkId(id, PATH_VARIABLE_ID);
-        return userService.getEventFeed(id);
+        return eventService.getEventFeed(id);
     }
 
     // вспомогательный метод для проверки id:

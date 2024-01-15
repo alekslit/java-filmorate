@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class DirectorDbService {
+public class DirectorService {
     private final DirectorStorage directorStorage;
 
     public List<Director> getAllDirectors() {

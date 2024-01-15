@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.service.MpaDbService;
+import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.List;
 
@@ -18,10 +18,10 @@ import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableExcep
 @Slf4j
 @RequestMapping("/mpa")
 public class MpaController {
-    private final MpaDbService mpaService;
+    private final MpaService mpaService;
 
     @Autowired
-    public MpaController(MpaDbService mpaService) {
+    public MpaController(MpaService mpaService) {
         this.mpaService = mpaService;
     }
 

@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dao.event.EventDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,7 +18,6 @@ import ru.yandex.practicum.filmorate.model.event.EventOperation;
 import ru.yandex.practicum.filmorate.model.event.EventType;
 import ru.yandex.practicum.filmorate.model.genre.FilmGenre;
 import ru.yandex.practicum.filmorate.model.genre.Genre;
-import ru.yandex.practicum.filmorate.utility.Events;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -197,7 +197,7 @@ public class FilmDbStorage implements FilmStorage {
         if (checkIfFilmExists(id) && checkIfUserExists(userId)) {
             jdbcTemplate.update(SQL_QUERY_FILM_ADD_LIKE, id, userId);
             // добавляем Event в БД:
-            Events.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.ADD, userId, id);
+            EventDbStorage.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.ADD, userId, id);
         } else {
             log.debug("{}: {}{} и {}.", IllegalIdException.class.getSimpleName(),
                     ILLEGAL_OBJECTS_ID_MESSAGE, id, userId);
@@ -211,7 +211,7 @@ public class FilmDbStorage implements FilmStorage {
         if (checkIfFilmExists(id) && checkIfUserExists(userId)) {
             jdbcTemplate.update(SQL_QUERY_REMOVE_LIKE_FROM_FILM, userId, id);
             // добавляем Event в БД:
-            Events.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.REMOVE, userId, id);
+            EventDbStorage.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.REMOVE, userId, id);
         } else {
             log.debug("{}: {}{} и {}.", IllegalIdException.class.getSimpleName(),
                     ILLEGAL_OBJECTS_ID_MESSAGE, id, userId);

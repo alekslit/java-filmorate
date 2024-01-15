@@ -9,11 +9,11 @@ import ru.yandex.practicum.filmorate.model.SortBy;
 import java.util.List;
 
 @Service
-public class FilmDbService implements FilmService {
+public class FilmServiceImpl implements FilmService {
     private final FilmDbStorage filmStorage;
 
     @Autowired
-    public FilmDbService(FilmDbStorage filmStorage) {
+    public FilmServiceImpl(FilmDbStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 

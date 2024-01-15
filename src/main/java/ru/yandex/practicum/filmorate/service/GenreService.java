@@ -8,11 +8,11 @@ import ru.yandex.practicum.filmorate.model.genre.Genre;
 import java.util.List;
 
 @Service
-public class GenreDbService {
+public class GenreService {
     private final GenreDbStorage genreStorage;
 
     @Autowired
-    public GenreDbService(GenreDbStorage genreStorage) {
+    public GenreService(GenreDbStorage genreStorage) {
         this.genreStorage = genreStorage;
     }
 

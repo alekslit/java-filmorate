@@ -6,13 +6,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dao.event.EventDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.event.EventOperation;
 import ru.yandex.practicum.filmorate.model.event.EventType;
-import ru.yandex.practicum.filmorate.utility.Events;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,7 @@ public class ReviewDbStorage implements ReviewStorage {
             Long reviewId = insertReview.executeAndReturnKey(reviewToMap(review)).longValue();
             review.setReviewId(reviewId);
             // добавляем Event в БД:
-            Events.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.ADD, review.getUserId(), reviewId);
+            EventDbStorage.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.ADD, review.getUserId(), reviewId);
 
             return review;
         } else {
@@ -70,14 +70,14 @@ public class ReviewDbStorage implements ReviewStorage {
             jdbcTemplate.update(SQL_QUERY_UPDATE_REVIEW_BY_ID, review.getContent(),
                     review.getIsPositive(), review.getReviewId());
             // добавляем Event в БД:
-            Events.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.UPDATE,
+            EventDbStorage.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.UPDATE,
                     findReviewById(review.getReviewId()).getUserId(), review.getReviewId());
 
         } else if (!checkIfReviewExists(review.getReviewId()) && checkIfUserExists(review.getUserId())
                 && checkIfFilmExists(review.getFilmId())) {
             addReview(review);
             // добавляем Event в БД:
-            Events.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.ADD,
+            EventDbStorage.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.ADD,
                     review.getUserId(), review.getReviewId());
 
         } else if (!checkIfUserExists(review.getUserId()) || !checkIfFilmExists(review.getFilmId())) {
@@ -99,7 +99,7 @@ public class ReviewDbStorage implements ReviewStorage {
         jdbcTemplate.update("DELETE FROM REVIEWS " +
                             "WHERE review_id = ?;", reviewId);
         // добавляем Event в БД:
-        Events.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.REMOVE, review.getUserId(), reviewId);
+        EventDbStorage.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.REMOVE, review.getUserId(), reviewId);
         return "Review deleted";
     }
 

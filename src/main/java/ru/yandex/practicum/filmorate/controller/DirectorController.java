@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.director.Director;
-import ru.yandex.practicum.filmorate.service.DirectorDbService;
+import ru.yandex.practicum.filmorate.service.DirectorService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -14,30 +14,30 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/directors")
 public class DirectorController {
-    private final DirectorDbService directorDbService;
+    private final DirectorService directorService;
 
     @GetMapping
     public List<Director> getAllDirectors() {
-        return directorDbService.getAllDirectors();
+        return directorService.getAllDirectors();
     }
 
     @GetMapping("/{id}")
     public Director getDirectorById(@PathVariable Integer id) {
-        return directorDbService.getByIdDirector(id);
+        return directorService.getByIdDirector(id);
     }
 
     @PostMapping
     public Director addDirector(@Valid @RequestBody Director director) {
-        return directorDbService.addDirector(director);
+        return directorService.addDirector(director);
     }
 
     @PutMapping
     public Director updateDirector(@Valid @RequestBody Director director) {
-        return directorDbService.updateDirector(director);
+        return directorService.updateDirector(director);
     }
 
     @DeleteMapping("/{id}")
     public boolean deleteDirector(@PathVariable Integer id) {
-        return directorDbService.deleteDirector(id);
+        return directorService.deleteDirector(id);
     }
 }

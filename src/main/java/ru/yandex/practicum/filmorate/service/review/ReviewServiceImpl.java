@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ReviewDbService implements ReviewService {
+public class ReviewServiceImpl implements ReviewService {
     private final ReviewStorage storage;
 
     @Override

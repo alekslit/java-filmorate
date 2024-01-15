@@ -6,15 +6,14 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dao.event.EventDbStorage;
 import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.event.EventOperation;
 import ru.yandex.practicum.filmorate.model.event.EventType;
-import ru.yandex.practicum.filmorate.utility.Events;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -135,7 +134,7 @@ public class UserDbStorage implements UserStorage {
                     .usingGeneratedKeyColumns("user_friendship_id");
             insertFriend.execute(userFriendsipToMap(id, friendId));
             // добавляем Event в БД:
-            Events.addEvent(jdbcTemplate, EventType.FRIEND, EventOperation.ADD, id, friendId);
+            EventDbStorage.addEvent(jdbcTemplate, EventType.FRIEND, EventOperation.ADD, id, friendId);
 
             return ADD_TO_FRIEND_MESSAGE + id + ", " + friendId;
         } else {
@@ -151,7 +150,8 @@ public class UserDbStorage implements UserStorage {
             String sqlQuery = SQL_QUERY_REMOVE_USER_FROM_FRIENDS;
             jdbcTemplate.update(sqlQuery, id, friendId);
             // добавляем Event в БД:
-            Events.addEvent(jdbcTemplate, EventType.FRIEND, EventOperation.REMOVE, id, friendId);
+            EventDbStorage.addEvent(jdbcTemplate, EventType.FRIEND, EventOperation.REMOVE, id, friendId);
+
             return REMOVE_FROM_FRIEND_MESSAGE + id + ", " + friendId;
         } else {
             log.error("{}: {}{} и {}.", IllegalIdException.class.getSimpleName(),
@@ -227,18 +227,6 @@ public class UserDbStorage implements UserStorage {
             filmDbStorage.setGenreForFilms(films);
         }
         return films;
-    }
-
-    // получаем ленту событий пользователя:
-    @Override
-    public List<Event> getEventFeed(Long userId) {
-        if (checkIfUserExists(userId)) {
-            String sqlQuery = SQL_QUERY_GET_EVENT_FEED;
-            return jdbcTemplate.query(sqlQuery, Events::mapRowToEvent, userId);
-        } else {
-            log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_USER_ID_MESSAGE, userId);
-            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + userId, ILLEGAL_USER_ID_ADVICE);
-        }
     }
 
     /*-----Вспомогательные методы-----*/

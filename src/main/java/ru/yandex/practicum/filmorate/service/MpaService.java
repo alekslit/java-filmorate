@@ -8,11 +8,11 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.util.List;
 
 @Service
-public class MpaDbService {
+public class MpaService {
     private final MpaDbStorage mpaStorage;
 
     @Autowired
-    public MpaDbService(MpaDbStorage mpaStorage) {
+    public MpaService(MpaDbStorage mpaStorage) {
         this.mpaStorage = mpaStorage;
     }
 

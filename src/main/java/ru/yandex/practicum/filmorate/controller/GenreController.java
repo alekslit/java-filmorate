@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.model.genre.Genre;
-import ru.yandex.practicum.filmorate.service.GenreDbService;
+import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.util.List;
 
@@ -18,10 +18,10 @@ import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableExcep
 @Slf4j
 @RequestMapping("/genres")
 public class GenreController {
-    private final GenreDbService genreService;
+    private final GenreService genreService;
 
     @Autowired
-    public GenreController(GenreDbService genreService) {
+    public GenreController(GenreService genreService) {
         this.genreService = genreService;
     }
 
