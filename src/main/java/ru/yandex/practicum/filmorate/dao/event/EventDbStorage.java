@@ -54,8 +54,8 @@ public class EventDbStorage implements EventStorage {
         if (checkIfUserExists(userId)) {
             String sqlQuery =
                     "SELECT * " +
-                    "FROM event_feed " +
-                    "WHERE user_id = ?;";
+                            "FROM event_feed " +
+                            "WHERE user_id = ?;";
             return jdbcTemplate.query(sqlQuery, this::mapRowToEvent, userId);
         } else {
             log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_USER_ID_MESSAGE, userId);
@@ -86,8 +86,8 @@ public class EventDbStorage implements EventStorage {
 
     private boolean checkIfUserExists(Long id) {
         Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
-                                                     "FROM USERS " +
-                                                     "WHERE user_id = ?", Integer.class, id);
+                "FROM USERS " +
+                "WHERE user_id = ?", Integer.class, id);
         if (result == 0) {
             log.error("Пользователя с таким id {} нет", id);
             return false;

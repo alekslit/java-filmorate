@@ -14,7 +14,10 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {FutureOrPresentSelectDateValidator.class})
 public @interface FutureOrPresentSelectDate {
     String message() default "{Дата должна быть позже или равняться выбранной дате}";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
+
     String value() default "1895-12-28";
 }

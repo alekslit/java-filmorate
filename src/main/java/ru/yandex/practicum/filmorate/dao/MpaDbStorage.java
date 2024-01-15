@@ -29,8 +29,8 @@ public class MpaDbStorage {
         if (checkIfMpaExists(mpaId)) {
             String sqlQuery =
                     "SELECT * " +
-                    "FROM mpa_rating " +
-                    "WHERE mpa_rating_id = ?;";
+                            "FROM mpa_rating " +
+                            "WHERE mpa_rating_id = ?;";
             Mpa mpa = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToMpa, mpaId);
 
             return mpa;
@@ -43,7 +43,7 @@ public class MpaDbStorage {
     public List<Mpa> getAllMpa() {
         String sqlQuery =
                 "SELECT * " +
-                "FROM mpa_rating;";
+                        "FROM mpa_rating;";
         return jdbcTemplate.query(sqlQuery, this::mapRowToMpa);
     }
 
@@ -59,8 +59,8 @@ public class MpaDbStorage {
 
     private boolean checkIfMpaExists(Integer id) {
         Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
-                                                     "FROM mpa_rating " +
-                                                     "WHERE mpa_rating_id = ?;", Integer.class, id);
+                "FROM mpa_rating " +
+                "WHERE mpa_rating_id = ?;", Integer.class, id);
         if (result == 0) {
             log.error("MPA-рейтинг с id = {} еще не добавлен.", id);
             return false;

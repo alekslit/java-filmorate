@@ -9,7 +9,7 @@ public class FilmGenre {
 /*    private int genreId;
     private String genre;*/
 
-    public FilmGenre (Long filmId, Genre genre) {
+    public FilmGenre(Long filmId, Genre genre) {
         this.filmId = filmId;
         this.genre = genre;
     }
