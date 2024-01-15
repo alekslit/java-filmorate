@@ -357,7 +357,7 @@ public class FilmDbStorage implements FilmStorage {
         films.forEach(this::sortGenres);
     }
 
-    private void setDirectorForFilms(List<Film> films) {
+    public void setDirectorForFilms(List<Film> films) {
         Map<Long, List<FilmDirector>> filmDirectorsMap = getFilmDirectorsMap(getFilmsId(films));
         films.forEach(film -> film.setDirectors(getDirectorsForFilm(film.getId(), filmDirectorsMap)));
         films.forEach(this::sortDirectors);

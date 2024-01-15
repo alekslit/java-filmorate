@@ -222,6 +222,7 @@ public class UserDbStorage implements UserStorage {
                             "WHERE fl.film_id NOT IN (" + userFilmsIdString + ") " +
                             "AND user_id = ?;", filmDbStorage.getFilmMapper(), anotherUserId);
             filmDbStorage.setGenreForFilms(films);
+            filmDbStorage.setDirectorForFilms(films);
         }
         return films;
     }
