@@ -75,15 +75,8 @@ public class DirectorDbStorage implements DirectorStorage {
         String deleteQuery = "DELETE " +
                              "FROM directors " +
                              "WHERE directors_id = ?;";
-        String updateQuery = "UPDATE directors " +
-                             "SET directors_id = directors_id - 1 " +
-                             "WHERE directors_id > ?;";
-
         // Удаление режиссера
         jdbcTemplate.update(deleteQuery, id);
-
-        // Обновление последующих идентификаторов режиссеров
-        jdbcTemplate.update(updateQuery, id);
     }
 
     /*---Вспомогательные методы---*/
