@@ -7,6 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class FilmDirector {
     private Long filmId;
-    private int directorId;
-    private String director;
+    private Director director;
 }

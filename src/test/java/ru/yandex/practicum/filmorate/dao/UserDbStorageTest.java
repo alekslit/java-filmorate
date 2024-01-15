@@ -1,4 +1,3 @@
-/*
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
@@ -26,11 +25,13 @@ import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL
 @JdbcTest
 public class UserDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
+    private UserDbStorage userStorage;
     private User user;
     private User userFriend;
     private User commonFriend;
 
     public void init() {
+        userStorage = new UserDbStorage(jdbcTemplate, new FilmDbStorage(jdbcTemplate));
         user = User.builder()
                 .email("testuser1@tset.com")
                 .login("test_user1_login")
@@ -186,4 +187,4 @@ public class UserDbStorageTest {
         assertEquals(user.getLogin(), newUser.getName(), "Ошибка проверки "
                 + "имени при User.name = null");
     }
-}*/
+}
