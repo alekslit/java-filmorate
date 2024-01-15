@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -414,6 +415,52 @@ public class FilmDbStorage implements FilmStorage {
                         "LIMIT ?;", getFilmMapper(), genreId, year, count);
         setGenreForFilms(films);
         setDirectorForFilms(films);
+        return films;
+    }
+
+    @Override
+    public List<Film> getRecommendations(Long id) {
+        List<Film> films = new ArrayList<>();
+        List<Long> userFilmsId = new ArrayList<>();
+        Long anotherUserId = null;
+        String userFilmsIdString = "";
+        if (checkIfUserExists(id)) {
+            try {
+                userFilmsId = jdbcTemplate.queryForList(
+                        "SELECT film_id " +
+                                "FROM film_likes " +
+                                "WHERE user_id = ?;", Long.class, id);
+
+                userFilmsIdString = userFilmsId.stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(",", " ", " "));
+
+                anotherUserId = jdbcTemplate.queryForObject(
+                        "SELECT user_id " +
+                                "FROM film_likes " +
+                                "WHERE NOT user_id = ? " +
+                                "AND film_id IN (" + userFilmsIdString + ") " +
+                                "GROUP BY user_id " +
+                                "ORDER BY COUNT(film_id) DESC " +
+                                "LIMIT 1;", Long.class, id);
+            } catch (EmptyResultDataAccessException e) {
+                return Collections.emptyList();
+            }
+            films = jdbcTemplate.query(
+                    "SELECT fl.film_id, " +
+                            "f.name, " +
+                            "f.release_date, " +
+                            "f.description, " +
+                            "f.duration, " +
+                            "mp.mpa_rating_id, " +
+                            "mp.name AS mpa_name " +
+                            "FROM FILM_LIKES AS fl " +
+                            "JOIN FILMS AS f ON fl.film_id = f.film_id " +
+                            "JOIN mpa_rating AS mp ON f.mpa_rating_id = mp.mpa_rating_id " +
+                            "WHERE fl.film_id NOT IN (" + userFilmsIdString + ") " +
+                            "AND user_id = ?;", getFilmMapper(), anotherUserId);
+            setGenreForFilms(films);
+        }
         return films;
     }
 

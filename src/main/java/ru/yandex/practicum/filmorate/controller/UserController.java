@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.service.event.EventService;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import javax.validation.Valid;
@@ -22,11 +23,14 @@ import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableExcep
 public class UserController {
     private final UserService userService;
     private final EventService eventService;
+    private final FilmService filmService;
+
 
     @Autowired
-    public UserController(UserService userService, EventService eventService) {
+    public UserController(UserService userService, EventService eventService, FilmService filmService) {
         this.userService = userService;
         this.eventService = eventService;
+        this.filmService = filmService;
     }
 
     // создание User:
@@ -99,7 +103,7 @@ public class UserController {
     // получаем список рекомендованных фильмов
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable Long id) {
-        return userService.getRecommendations(id);
+        return filmService.getRecommendations(id);
     }
 
     // получаем ленту событий пользователя:
