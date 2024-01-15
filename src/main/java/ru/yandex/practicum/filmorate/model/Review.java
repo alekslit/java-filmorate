@@ -5,14 +5,15 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Data
 @Builder(toBuilder = true)
 public class Review {
     private Long reviewId;
     @NotBlank
+    @Size(max = 300, message = "Слишком длинный отзыв (лимит: {max} символов)")
     private String content;
-//    @JsonProperty("isPositive") // objectMapper не кладёт булеан по умолчанию, так как его геттер не имеет префикс get
     @NotNull
     private Boolean isPositive;
     @NotNull

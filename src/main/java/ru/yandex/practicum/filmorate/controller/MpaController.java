@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.service.MpaDbService;
+import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.List;
 
@@ -18,10 +18,10 @@ import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableExcep
 @Slf4j
 @RequestMapping("/mpa")
 public class MpaController {
-    private final MpaDbService mpaService;
+    private final MpaService mpaService;
 
     @Autowired
-    public MpaController(MpaDbService mpaService) {
+    public MpaController(MpaService mpaService) {
         this.mpaService = mpaService;
     }
 
@@ -40,9 +40,9 @@ public class MpaController {
 
     // вспомогательный метод для проверки id:
     public void checkId(Integer id, String pathVariable) {
-        if (id == null || id <= 0) {
-            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id,
-                    IncorrectPathVariableException.class.getSimpleName());
+        if (id <= 0) {
+            log.debug("{}: {} {} = {}", IncorrectPathVariableException.class.getSimpleName(),
+                    INCORRECT_PATH_VARIABLE_MESSAGE, pathVariable, id);
             throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
                     PATH_VARIABLE_ID_ADVICE);
         }

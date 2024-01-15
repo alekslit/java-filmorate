@@ -9,18 +9,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
+import javax.validation.ConstraintViolationException;
+
 @RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
 @Slf4j
 public class ErrorHandler {
     /*---Обработчики для статуса 400 (Bad request)---*/
-    @ExceptionHandler
+    @ExceptionHandler({IncorrectRequestParameterException.class, AlreadyExistException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIncorrectRequestParameterException(final IncorrectRequestParameterException e) {
+    public ErrorResponse handleBadRequestException(final CustomException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error(e.getMessage())
                 .adviceToUser(e.getAdviceToUser())
                 .build();
-        log.debug("{}: " + e.getMessage(), IncorrectRequestParameterException.class.getSimpleName());
+        log.debug("{}: {}", e.getClass().getSimpleName(), e.getMessage());
 
         return errorResponse;
     }
@@ -32,62 +34,38 @@ public class ErrorHandler {
                 .error("Ошибка валидации данных из запроса.")
                 .adviceToUser(e.getFieldError().getDefaultMessage())
                 .build();
-        log.debug("{}: " + e.getFieldError().getDefaultMessage(),
-                MethodArgumentNotValidException.class.getSimpleName());
+        log.debug("{}: {}", MethodArgumentNotValidException.class.getSimpleName(),
+                e.getFieldError().getDefaultMessage());
 
         return errorResponse;
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleAlreadyExistException(final AlreadyExistException e) {
+    public ErrorResponse handleConstraintViolationException(final ConstraintViolationException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .error(e.getMessage())
-                .adviceToUser(e.getAdviceToUser())
+                .error("Ошибка валидации данных из запроса.")
+                .adviceToUser(e.getMessage())
                 .build();
-        log.debug("{}: " + e.getMessage(), AlreadyExistException.class.getSimpleName());
+        log.debug("{}: {}", ConstraintViolationException.class.getSimpleName(), e.getMessage());
 
         return errorResponse;
     }
 
     /*---Обработчики для статуса 404 (Not found)---*/
-    @ExceptionHandler
+    @ExceptionHandler({IllegalIdException.class, IncorrectPathVariableException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleIllegalIdException(final IllegalIdException e) {
+    public ErrorResponse handleNotFoundException(final CustomException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error(e.getMessage())
                 .adviceToUser(e.getAdviceToUser())
                 .build();
-        log.debug("{}: " + e.getMessage(), IllegalIdException.class.getSimpleName());
+        log.debug("{}: {}", e.getClass().getSimpleName(), e.getMessage());
 
         return errorResponse;
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleIncorrectPathVariableException(final IncorrectPathVariableException e) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .error(e.getMessage())
-                .adviceToUser(e.getAdviceToUser())
-                .build();
-        log.debug("{}: " + e.getMessage(), IncorrectPathVariableException.class.getSimpleName());
-
-        return errorResponse;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleInvalidDataBaseQueryException(final InvalidDataBaseQueryException e) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .error(e.getMessage())
-                .adviceToUser(e.getAdviceToUser())
-                .build();
-        log.debug("{}: " + e.getMessage(), InvalidDataBaseQueryException.class.getSimpleName());
-
-        return errorResponse;
-    }
-
-    //*---Обработчики для статуса 500 (Internal server error)---*//*
+    /*---Обработчики для статуса 500 (Internal server error)---*/
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
@@ -95,7 +73,7 @@ public class ErrorHandler {
                 .error("Произошла непредвиденная ошибка.")
                 .adviceToUser("Пожалуйста обратитесь в службу технической поддержки.")
                 .build();
-        log.debug("{}: " + e.getMessage(), e.getClass().getSimpleName());
+        log.debug("{}: {}", e.getClass().getSimpleName(), e.getMessage());
 
         return errorResponse;
     }

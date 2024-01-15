@@ -3,8 +3,11 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.annotation.FutureOrPresentSelectDate;
+import ru.yandex.practicum.filmorate.model.director.Director;
+import ru.yandex.practicum.filmorate.model.genre.Genre;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
@@ -17,6 +20,7 @@ public class Film {
     private Long id;
 
     // название:
+    @Size(max = 40, message = "Слишком длинное название фильма (лимит: {max} символов)")
     @NotBlank(message = "Название фильма не может быть пустым")
     private String name;
 
@@ -30,6 +34,7 @@ public class Film {
 
     // продолжительность в минутах:
     @Positive(message = "Продолжительность фильма должна быть положительным числом")
+    @NotNull(message = "Продолжительность фильма не может быть пустой.")
     private Integer duration;
 
     // MPA-рейтинг фильма:
@@ -37,5 +42,7 @@ public class Film {
 
     // жанры фильма:
     private Set<Genre> genres;
+
+    // режиссёры фильма:
     private Set<Director> directors;
 }

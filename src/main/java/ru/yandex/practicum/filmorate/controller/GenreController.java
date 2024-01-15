@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.service.GenreDbService;
+import ru.yandex.practicum.filmorate.model.genre.Genre;
+import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.util.List;
 
@@ -18,10 +18,10 @@ import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableExcep
 @Slf4j
 @RequestMapping("/genres")
 public class GenreController {
-    private final GenreDbService genreService;
+    private final GenreService genreService;
 
     @Autowired
-    public GenreController(GenreDbService genreService) {
+    public GenreController(GenreService genreService) {
         this.genreService = genreService;
     }
 
@@ -40,9 +40,9 @@ public class GenreController {
 
     // вспомогательный метод для проверки id:
     public void checkId(Integer id, String pathVariable) {
-        if (id == null || id <= 0) {
-            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id,
-                    IncorrectPathVariableException.class.getSimpleName());
+        if (id <= 0) {
+            log.debug("{}: {} {} = {}", IncorrectPathVariableException.class.getSimpleName(),
+                    INCORRECT_PATH_VARIABLE_MESSAGE, pathVariable, id);
             throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
                     PATH_VARIABLE_ID_ADVICE);
         }

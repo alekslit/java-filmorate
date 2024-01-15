@@ -8,11 +8,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.dao.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.dao.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dao.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
-import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
-import ru.yandex.practicum.filmorate.dao.UserDbStorage;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.director.Director;
+import ru.yandex.practicum.filmorate.model.genre.Genre;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -138,9 +142,8 @@ public class FilmDbStorageTest {
                 .name("name")
                 .birthday(LocalDate.of(1946, 8, 20))
                 .build();
-        jdbcTemplate.update("INSERT INTO FILMS(film_id, name, description, " +
-                                                   "RELEASE_DATE, duration, mpa_rating_id) " +
-                            "VALUES (?,?,?,?,?,?)",
+        jdbcTemplate.update("INSERT INTO FILMS(film_id, name, description, RELEASE_DATE, duration, mpa_rating_id) " +
+                            "VALUES (?, ?, ?, ?, ?, ?);",
                             film.getId(),
                             film.getName(),
                             film.getDescription(),
@@ -148,7 +151,7 @@ public class FilmDbStorageTest {
                             film.getDuration(),
                             film.getMpa().getId());
         jdbcTemplate.update("INSERT INTO users(user_id, email, login, name, birthday) " +
-                            "VALUES (?,?,?,?, ?)",
+                            "VALUES (?, ?, ?, ?, ?);",
                             user.getId(),
                             user.getEmail(),
                             user.getLogin(),
@@ -156,8 +159,9 @@ public class FilmDbStorageTest {
                             user.getBirthday());
 
         filmStorage.addLikeToFilm(film.getId(), user.getId());
-        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM film_likes WHERE film_id = ?",
-                                                    Integer.class, film.getId());
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
+                                                    "FROM film_likes " +
+                                                    "WHERE film_id = ?;", Integer.class, film.getId());
 
         assertEquals(1, count);
     }
@@ -185,9 +189,8 @@ public class FilmDbStorageTest {
                 .name("name")
                 .birthday(LocalDate.of(1946, 8, 20))
                 .build();
-        jdbcTemplate.update("INSERT INTO FILMS(film_id, name, description, " +
-                                                   "RELEASE_DATE, duration, mpa_rating_id) " +
-                            "VALUES (?,?,?,?,?,?)",
+        jdbcTemplate.update("INSERT INTO FILMS(film_id, name, description, RELEASE_DATE, duration, mpa_rating_id) " +
+                            "VALUES (?, ?, ?, ?, ?, ?);",
                             film.getId(),
                             film.getName(),
                             film.getDescription(),
@@ -195,18 +198,20 @@ public class FilmDbStorageTest {
                             film.getDuration(),
                             film.getMpa().getId());
         jdbcTemplate.update("INSERT INTO USERS(user_id, email, login, name, birthday) " +
-                            "VALUES (?,?,?,?, ?)",
+                            "VALUES (?, ?, ?, ?, ?);",
                             user.getId(),
                             user.getEmail(),
                             user.getLogin(),
                             user.getName(),
                             user.getBirthday());
-        jdbcTemplate.update("INSERT INTO film_likes(user_id, film_id) VALUES(?, ?)", user.getId(), film.getId());
+        jdbcTemplate.update("INSERT INTO film_likes(user_id, film_id) " +
+                            "VALUES(?, ?);", user.getId(), film.getId());
 
         filmStorage.removeLikeFromFilm(film.getId(), user.getId());
 
-        assertEquals(0, jdbcTemplate.queryForObject("SELECT COUNT(*) FROM film_likes WHERE film_id = ?",
-                                                    Integer.class, film.getId()));
+        assertEquals(0, jdbcTemplate.queryForObject("SELECT COUNT(*) " +
+                                                             "FROM film_likes " +
+                                                             "WHERE film_id = ?;", Integer.class, film.getId()));
     }
 
     // проверяем функцию получения топ фильмов:

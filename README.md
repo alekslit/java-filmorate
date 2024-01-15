@@ -5,7 +5,7 @@ Template repository for Filmorate project.
 
 ER-диаграмма базы данных:
 
-![ER-diagram of the Filmorate application database.](er_diagram.jpg)
+![ER-diagram of the Filmorate application database.](filmorate_db.bmp)
 
 Примеры SQL запросов к БД:
 
@@ -13,18 +13,13 @@ ER-диаграмма базы данных:
 ```
 SELECT f.film_id,
        f.name,
-       f.description,
        f.release_date,
+       f.description,
        f.duration,
-       f.rate,
-       mr.mpa_rating_id,
-       mr.name AS mpa_name,
-       g.genre_id,
-       g.name AS genre_name
+       mp.mpa_rating_id,
+       mp.name AS mpa_name
 FROM films AS f
-LEFT OUTER JOIN mpa_rating AS mr ON (f.mpa_rating_id = mr.mpa_rating_id)
-LEFT OUTER JOIN film_genres AS fg ON (f.film_id = fg.film_id)
-LEFT OUTER JOIN genre AS g ON (fg.genre_id = g.genre_id);
+JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id);
 ```
 2. Получение списка всех пользователей:
 ```
@@ -35,18 +30,13 @@ FROM users;
 ```
 SELECT f.film_id,
        f.name,
-       f.description,
        f.release_date,
+       f.description,
        f.duration,
-       f.rate,
-       mr.mpa_rating_id,
-       mr.name AS mpa_name,
-       g.genre_id,
-       g.name AS genre_name
+       mp.mpa_rating_id,
+       mp.name AS mpa_name
 FROM films AS f
-LEFT OUTER JOIN mpa_rating AS mr ON (f.mpa_rating_id = mr.mpa_rating_id)
-LEFT OUTER JOIN film_genres AS fg ON (f.film_id = fg.film_id)
-LEFT OUTER JOIN genre AS g ON (fg.genre_id = g.genre_id)
+JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id)
 WHERE film_id = 1;
 ```
 4. Получение пользователя по id (в примере ищем пользователя с id = 1):
@@ -59,19 +49,17 @@ WHERE user_id = 1;
 ```
 SELECT f.film_id,
        f.name,
-       f.description,
        f.release_date,
+       f.description,
        f.duration,
-       f.rate,
-       mr.mpa_rating_id,
-       mr.name AS mpa_name,
-       g.genre_id,
-       g.name AS genre_name
+       mp.mpa_rating_id,
+       mp.name AS mpa_name
 FROM films AS f
-LEFT OUTER JOIN mpa_rating AS mr ON (f.mpa_rating_id = mr.mpa_rating_id)
-LEFT OUTER JOIN film_genres AS fg ON (f.film_id = fg.film_id)
-LEFT OUTER JOIN genre AS g ON (fg.genre_id = g.genre_id)
-ORDER BY f.rate DESC
+LEFT OUTER JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id)
+LEFT OUTER JOIN film_likes AS fl ON (f.film_id = fl.film_id)
+GROUP BY f.film_id,
+         fl.user_id
+ORDER BY COUNT(fl.user_id) DESC
 LIMIT 10;
 ```
 6. Получаем список друзей пользователя (например пользователя с id = 1):
@@ -120,3 +108,9 @@ WHERE mpa_rating_id = 1;
 "SELECT *
 FROM mpa_rating;
 ```
+
+## Ссылки.
+
+Ссылка на канбан-доску, с распределением задач между членами команды:
+
+https://github.com/users/alekslit/projects/1/views/1
