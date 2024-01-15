@@ -78,12 +78,18 @@ public class FilmServiceImpl implements FilmService {
             case TITLE_DIRECTOR:
                 return filmStorage.searchFilmsByTitleAndDirector(query);
             default:
-                throw new IllegalArgumentException("Invalid 'by' parameter. Supported values are 'director', 'title', 'director,title' and 'title,director'");
+                throw new IllegalArgumentException("Invalid 'by' parameter. Supported values are 'director', " +
+                        "'title', 'director,title' and 'title,director'");
         }
     }
 
     @Override
     public List<Film> getTopFilmsForLikesWithYearAndGenreFilter(Integer count, Long genreId, Integer year) {
         return filmStorage.getTopFilmsForLikesWithYearAndGenreFilter(count, genreId, year);
+    }
+
+    @Override
+    public List<Film> getRecommendations(Long id) {
+        return filmStorage.getRecommendations(id);
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.dao.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.dao.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
-import ru.yandex.practicum.filmorate.dao.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -34,15 +33,12 @@ import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL
 public class FilmDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
     private FilmDbStorage filmStorage;
-    private UserDbStorage userStorage;
     private Film film;
-    private User userForLike;
     private Film filmForCheckTopList;
     private DirectorStorage directorStorage;
 
     public void init() {
         filmStorage = new FilmDbStorage(jdbcTemplate);
-        userStorage = new UserDbStorage(jdbcTemplate, filmStorage);
         directorStorage = new DirectorDbStorage(jdbcTemplate);
         Director director = new Director(1, "TestDirector");
         directorStorage.addDirector(director);
@@ -63,12 +59,6 @@ public class FilmDbStorageTest {
                         .id(director.getId())
                         .name(director.getName())
                         .build()))
-                .build();
-        userForLike = User.builder()
-                .email("testuser1@tset.com")
-                .login("test_user1_login")
-                .name("test_user1_name")
-                .birthday(LocalDate.of(2000, 1, 1))
                 .build();
         filmForCheckTopList = Film.builder()
                 .name("Не_попадёт_в_топ_до_выставления_лайков.")

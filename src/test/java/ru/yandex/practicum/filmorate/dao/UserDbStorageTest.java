@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
@@ -31,7 +30,7 @@ public class UserDbStorageTest {
     private User commonFriend;
 
     public void init() {
-        userStorage = new UserDbStorage(jdbcTemplate, new FilmDbStorage(jdbcTemplate));
+        userStorage = new UserDbStorage(jdbcTemplate);
         user = User.builder()
                 .email("testuser1@tset.com")
                 .login("test_user1_login")

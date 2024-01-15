@@ -22,4 +22,6 @@ public interface FilmStorage {
     List<Film> searchFilmsByTitle(String query);
 
     List<Film> searchFilmsByTitleAndDirector(String query);
+
+    List<Film> getRecommendations(Long id);
 }
