@@ -545,10 +545,15 @@ public class FilmDbStorage implements FilmStorage {
         // можно будет обращаться к этой мапе для получения фильма за O(1)
         final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, identity()));
         List<FilmGenre> filmGenresList = getFilmGenreMap(getFilmsId(films));
-        filmGenresList.stream()
-                .
-
-
+        for (FilmGenre filmGenre : filmGenresList) {
+            if (filmById.get(filmGenre.getFilmId()) != null) {
+                Film film = filmById.get(filmGenre.getFilmId());
+                Set<Genre> genres = film.getGenres();
+                genres.add(filmGenre.getGenre());
+                film.setGenres(genres);
+            }
+        }
+        films.forEach(this::sortGenres);
     }
 
     public void setDirectorForFilms(List<Film> films) {
@@ -559,7 +564,7 @@ public class FilmDbStorage implements FilmStorage {
 
     //private Map<Long, List<FilmGenre>> getFilmGenreMap(List<Long> filmsId) {
     private List<FilmGenre> getFilmGenreMap(List<Long> filmsId) { //todo name
-        List<FilmGenre> genres = getGenres(filmsId);
+        List<FilmGenre> genres = getGenres(filmsId); //film_id, new Genre()
         return genres;
                 //genres.stream()
                 //.collect(Collectors.groupingBy(FilmGenre::getFilmId));
@@ -595,10 +600,8 @@ public class FilmDbStorage implements FilmStorage {
 
     private RowMapper<FilmGenre> getFilmGenreMapper() {
         return (rs, rowNum) -> new FilmGenre(
-                rs.getInt("film_id"),
-                rs.getInt("genre_id"),
-                rs.getString("name")
-        );
+                rs.getLong("film_id"),
+                new Genre(rs.getInt("genre_id"),rs.getString("name")));
     }
 
     private RowMapper<FilmDirector> getFilmDirectorMapper() {
@@ -615,7 +618,7 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.toList());
     }
 
-    private Set<Genre> getGenresForFilm(Long filmId, Map<Long, List<FilmGenre>> resultMapForFilm) {
+/*    private Set<Genre> getGenresForFilm(Long filmId, Map<Long, List<FilmGenre>> resultMapForFilm) {
         if (resultMapForFilm.get(filmId) == null) {
             log.error("Для фильма с id {} не указано жанров", filmId);
             return Collections.emptySet();
@@ -623,7 +626,7 @@ public class FilmDbStorage implements FilmStorage {
         return resultMapForFilm.get(filmId).stream()
                 .map(filmGenre -> new Genre(filmGenre.getGenreId(), filmGenre.getGenre()))
                 .collect(Collectors.toSet());
-    }
+    }*/
 
     public void setGenreForFilm(Film film) {
         List<FilmGenre> filmGenreList = getGenres(Collections.singletonList(film.getId()));
@@ -632,7 +635,7 @@ public class FilmDbStorage implements FilmStorage {
             film.setGenres(Collections.emptySet());
         } else {
             film.setGenres(filmGenreList.stream()
-                    .map(filmGenre -> new Genre(filmGenre.getGenreId(), filmGenre.getGenre()))
+                    .map(FilmGenre::getGenre)
                     .collect(Collectors.toSet()));
             sortGenres(film);
         }
