@@ -34,7 +34,7 @@ public class GenreDbStorage {
 
             return genre;
         }
-        log.debug("{}: {}", IllegalIdException.class.getSimpleName(), ILLEGAL_GENRE_ID_MESSAGE + genreId);
+        log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_GENRE_ID_MESSAGE, genreId);
         throw new IllegalIdException(ILLEGAL_GENRE_ID_MESSAGE + genreId, ILLEGAL_GENRE_ID_ADVICE);
     }
 
@@ -59,7 +59,7 @@ public class GenreDbStorage {
                                                      "FROM genre " +
                                                      "WHERE genre_id = ?;", Integer.class, id);
         if (result == 0) {
-            log.error("жанр с id {} еще не добавлен.", id);
+            log.error("жанр с id = {} еще не добавлен.", id);
             return false;
         }
         return true;

@@ -108,9 +108,9 @@ public class UserController {
 
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {
-        if (id == null || id <= 0) {
-            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id,
-                    IncorrectPathVariableException.class.getSimpleName());
+        if (id <= 0) {
+            log.debug("{}: {} {} = {}", IncorrectPathVariableException.class.getSimpleName(),
+                    INCORRECT_PATH_VARIABLE_MESSAGE, pathVariable, id);
             throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
                     PATH_VARIABLE_ID_ADVICE);
         }

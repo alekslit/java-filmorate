@@ -57,7 +57,7 @@ public class DirectorDbStorage implements DirectorStorage {
     public Director updateDirector(Director director) {
         if (getByIdDirector(director.getId()) != null) {
             String query = SQL_QUERY_UPDATE_DIRECTOR;
-            log.info("UPDATE request to DB Directors: " + director.getName());
+            log.info("UPDATE request to DB Directors: {}", director.getName());
             jdbcTemplate.update(query, director.getName(), director.getId());
         }
 

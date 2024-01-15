@@ -2,22 +2,24 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException;
-import ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 import static ru.yandex.practicum.filmorate.exception.IncorrectPathVariableException.*;
-import static ru.yandex.practicum.filmorate.exception.IncorrectRequestParameterException.*;
 
 // класс контроллер для фильмов:
 @RestController
 @Slf4j
+@Validated
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
@@ -79,18 +81,14 @@ public class FilmController {
 
     // получаем список топ фильмов по количеству лайков в размере {count}:
     @GetMapping("/popular")
-    public List<Film> getTopFilmsForLikes(@RequestParam(defaultValue = "10") Integer count,
-                                          @RequestParam(defaultValue = "0") Long genreId,
-                                          @RequestParam(defaultValue = "0") Integer year) {
-        if (count <= 0) {
-            log.debug("{}: " + INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT,
-                    IncorrectRequestParameterException.class.getSimpleName());
-            throw new IncorrectRequestParameterException(INCORRECT_REQUEST_PARAM_MESSAGE + REQUEST_PARAM_COUNT,
-                    REQUEST_PARAMETER_COUNT_ADVICE);
-        }
-
+    public List<Film> getTopFilmsForLikes(
+            @RequestParam(defaultValue = "10") @Positive(message = "Параметр запроса count, должен быть " +
+                    "положительным числом.") Integer count,
+            @RequestParam(defaultValue = "0") Long genreId,
+            @RequestParam(required = false) @Min(value = 1895, message = "Параметр запроса year, не может быть " +
+                    "меньше {value}.") Integer year) {
         // обычный топ фильмов:
-        if (genreId == 0 && year == 0) {
+        if (genreId == 0 && year == null) {
             return filmService.getTopFilmsForLikes(count);
         }
 
@@ -119,9 +117,9 @@ public class FilmController {
 
     // вспомогательный метод для проверки id:
     public void checkId(Long id, String pathVariable) {
-        if (id == null || id <= 0) {
-            log.debug("{}: " + INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable + " = " + id,
-                    IncorrectPathVariableException.class.getSimpleName());
+        if (id <= 0) {
+            log.debug("{}: {} {} = {}", IncorrectPathVariableException.class.getSimpleName(),
+                    INCORRECT_PATH_VARIABLE_MESSAGE, pathVariable, id);
             throw new IncorrectPathVariableException(INCORRECT_PATH_VARIABLE_MESSAGE + pathVariable,
                     PATH_VARIABLE_ID_ADVICE);
         }

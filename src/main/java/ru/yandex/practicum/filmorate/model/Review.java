@@ -12,8 +12,6 @@ public class Review {
     private Long reviewId;
     @NotBlank
     private String content;
-    // @JsonProperty("isPositive")
-    // objectMapper не кладёт булеан по умолчанию, так как его геттер не имеет префикс get
     @NotNull
     private Boolean isPositive;
     @NotNull

@@ -34,7 +34,7 @@ public class MpaDbStorage {
 
             return mpa;
         }
-        log.debug("{}: {}", IllegalIdException.class.getSimpleName(), ILLEGAL_MPA_ID_MESSAGE + mpaId);
+        log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_MPA_ID_MESSAGE, mpaId);
         throw new IllegalIdException(ILLEGAL_MPA_ID_MESSAGE + mpaId, ILLEGAL_MPA_ID_ADVICE);
     }
 
@@ -59,7 +59,7 @@ public class MpaDbStorage {
                                                      "FROM mpa_rating " +
                                                      "WHERE mpa_rating_id = ?;", Integer.class, id);
         if (result == 0) {
-            log.error("MPA-рейтинг с id {} еще не добавлен.", id);
+            log.error("MPA-рейтинг с id = {} еще не добавлен.", id);
             return false;
         }
         return true;

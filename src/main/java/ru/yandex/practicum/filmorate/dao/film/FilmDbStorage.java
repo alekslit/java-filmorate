@@ -57,15 +57,14 @@ public class FilmDbStorage implements FilmStorage {
                 sortDirectors(film);
             }
         } else if (getFilmById(film.getId()) != null) {
-            log.debug("{}: " + FILM_ALREADY_EXIST_MESSAGE + film.getId(),
-                    AlreadyExistException.class.getSimpleName());
+            log.debug("{}: {}{}", AlreadyExistException.class.getSimpleName(),
+                    FILM_ALREADY_EXIST_MESSAGE, film.getId());
             throw new AlreadyExistException(FILM_ALREADY_EXIST_MESSAGE + film.getId(), FILM_ALREADY_EXIST_ADVICE);
         } else if (film.getId() != null) {
-            log.debug("{}: " + ILLEGAL_NEW_FILM_ID_MESSAGE + film.getId(),
-                    IllegalIdException.class.getSimpleName());
+            log.debug("{}: {}{}", IllegalIdException.class.getSimpleName(), ILLEGAL_NEW_FILM_ID_MESSAGE, film.getId());
             throw new IllegalIdException(ILLEGAL_NEW_FILM_ID_MESSAGE + film.getId(), ILLEGAL_NEW_FILM_ID_ADVICE);
         }
-        log.debug("Добавлен новый фильм: " + film.getName() + ", с id = " + film.getId());
+        log.debug("Добавлен новый фильм: {}, c id = {}", film.getName(), film.getId());
         return film;
     }
 
@@ -107,10 +106,10 @@ public class FilmDbStorage implements FilmStorage {
                         .build();
                 }
             }
-            log.debug("Обновлена информация о фильме: " + film.getName() + ", с id = " + film.getId());
+            log.debug("Обновлена информация о фильме: {}, c id = {}", film.getName(), film.getId());
         } else if (!checkIfFilmExists(film.getId())) {
             addFilm(film);
-            log.debug("Добавлен новый фильм: " + film.getName() + ", с id = " + film.getId());
+            log.debug("Добавлен новый фильм: {}, c id = {}", film.getName(), film.getId());
         }
         return film;
     }
@@ -200,8 +199,8 @@ public class FilmDbStorage implements FilmStorage {
             // добавляем Event в БД:
             Events.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.ADD, userId, id);
         } else {
-            log.debug("{}: " + ILLEGAL_OBJECTS_ID_MESSAGE + id + ", " + userId,
-                    IllegalIdException.class.getSimpleName());
+            log.debug("{}: {}{} и {}.", IllegalIdException.class.getSimpleName(),
+                    ILLEGAL_OBJECTS_ID_MESSAGE, id, userId);
             throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE, ILLEGAL_OBJECTS_ID_ADVICE);
         }
         return String.format("Пользователь с id: %d, поставил лайк фильму с id: %d.", userId, id);
@@ -214,8 +213,8 @@ public class FilmDbStorage implements FilmStorage {
             // добавляем Event в БД:
             Events.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.REMOVE, userId, id);
         } else {
-            log.debug("{}: " + ILLEGAL_OBJECTS_ID_MESSAGE + id + ", " + userId,
-                    IllegalIdException.class.getSimpleName());
+            log.debug("{}: {}{} и {}.", IllegalIdException.class.getSimpleName(),
+                    ILLEGAL_OBJECTS_ID_MESSAGE, id, userId);
             throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE, ILLEGAL_OBJECTS_ID_ADVICE);
         }
         return String.format("Пользователь с id: %d, удалил свой лайк фильму с id: %d.", userId, id);
@@ -248,7 +247,7 @@ public class FilmDbStorage implements FilmStorage {
             setDirectorForFilms(films);
             return films;
 
-        } else if (year == 0) {
+        } else if (year == null) {
             // топ с фильтром по жанру {genreId}:
             List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES + TOP_FILMS_WITH_GENRE_FILTER,
                     getFilmMapper(), genreId, count);

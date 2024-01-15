@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 
+import javax.validation.ConstraintViolationException;
+
 @RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
 @Slf4j
 public class ErrorHandler {
@@ -34,6 +36,18 @@ public class ErrorHandler {
                 .build();
         log.debug("{}: {}", MethodArgumentNotValidException.class.getSimpleName(),
                 e.getFieldError().getDefaultMessage());
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintViolationException(final ConstraintViolationException e) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error("Ошибка валидации данных из запроса.")
+                .adviceToUser(e.getMessage())
+                .build();
+        log.debug("{}: {}", ConstraintViolationException.class.getSimpleName(), e.getMessage());
 
         return errorResponse;
     }

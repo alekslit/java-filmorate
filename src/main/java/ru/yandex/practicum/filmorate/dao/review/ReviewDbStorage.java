@@ -51,15 +51,13 @@ public class ReviewDbStorage implements ReviewStorage {
                     .withTableName("reviews")
                     .usingGeneratedKeyColumns("review_id");
             Long reviewId = insertReview.executeAndReturnKey(reviewToMap(review)).longValue();
-            try {
-                review.setReviewId(reviewId);
-                // добавляем Event в БД:
-                Events.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.ADD, review.getUserId(), reviewId);
-            } catch (NullPointerException e) {
-                throw new RuntimeException("null");
-            }
+            review.setReviewId(reviewId);
+            // добавляем Event в БД:
+            Events.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.ADD, review.getUserId(), reviewId);
+
             return review;
         } else {
+            log.debug("{}: {}", IllegalIdException.class.getSimpleName(), ILLEGAL_NEW_REVIEW_ID_MESSAGE);
             throw new IllegalIdException(ILLEGAL_NEW_REVIEW_ID_MESSAGE, ILLEGAL_NEW_REVIEW_ID_ADVICE);
         }
     }
@@ -83,11 +81,10 @@ public class ReviewDbStorage implements ReviewStorage {
                     review.getUserId(), review.getReviewId());
 
         } else if (!checkIfUserExists(review.getUserId()) || !checkIfFilmExists(review.getFilmId())) {
-            log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + review.getUserId() +
-                            " / " + ILLEGAL_FILM_ID_MESSAGE + review.getFilmId(),
-                    IllegalIdException.class.getSimpleName());
+            log.debug("{}: {}{} или {}{}", IllegalIdException.class.getSimpleName(), ILLEGAL_USER_ID_MESSAGE,
+                    review.getUserId(), ILLEGAL_FILM_ID_MESSAGE, review.getFilmId());
             throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + review.getUserId() +
-                    " / " + ILLEGAL_FILM_ID_MESSAGE + review.getFilmId(), ILLEGAL_OBJECTS_ID_ADVICE);
+                    " или " + ILLEGAL_FILM_ID_MESSAGE + review.getFilmId(), ILLEGAL_OBJECTS_ID_ADVICE);
         }
 
         return jdbcTemplate.queryForObject("SELECT * " +
@@ -112,7 +109,7 @@ public class ReviewDbStorage implements ReviewStorage {
                 List<Review> reviews = jdbcTemplate.query(SQL_QUERY_FIND_ALL_REVIEWS_BY_ID, getReviewMapper(), filmId, count);
                 return reviews;
             } else {
-                log.debug("{}: " + ILLEGAL_FILM_ID_MESSAGE + filmId, IllegalIdException.class.getSimpleName());
+                log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_FILM_ID_MESSAGE, filmId);
                 throw new IllegalIdException(ILLEGAL_FILM_ID_MESSAGE + filmId, ILLEGAL_FILM_ID_ADVICE);
             }
         }
@@ -128,8 +125,8 @@ public class ReviewDbStorage implements ReviewStorage {
             return "Лайк добавлен";
         }
 
-        log.debug("{}: " + "Лайк уже добавлен", AlreadyExistException.class.getSimpleName());
-        throw new AlreadyExistException("Лайк уже добавлен", "Проверьте введенные данные");
+        log.debug("{}: {}.", AlreadyExistException.class.getSimpleName(), "Лайк уже добавлен.");
+        throw new AlreadyExistException("Лайк уже добавлен.", "Проверьте введенные данные.");
     }
 
     @Override
@@ -140,8 +137,8 @@ public class ReviewDbStorage implements ReviewStorage {
             return "Дизлайк добавлен";
         }
 
-        log.debug("{}: " + "Дизлайк уже добавлен", AlreadyExistException.class.getSimpleName());
-        throw new AlreadyExistException("Дизлайк уже добавлен", "Проверьте введенные данные");
+        log.debug("{}: {}.", AlreadyExistException.class.getSimpleName(), "Дизлайк уже добавлен.");
+        throw new AlreadyExistException("Дизлайк уже добавлен.", "Проверьте введенные данные.");
     }
 
     @Override
@@ -152,8 +149,8 @@ public class ReviewDbStorage implements ReviewStorage {
             return "Лайк удален";
         }
 
-        log.debug("{}: " + "Лайк не был добавлен", IllegalIdException.class.getSimpleName());
-        throw new IllegalIdException("Лайк не был добавлен", "Проверьте введенные данные");
+        log.debug("{}: {}.", IllegalIdException.class.getSimpleName(), "Лайк не был добавлен.");
+        throw new IllegalIdException("Лайк не был добавлен.", "Проверьте введенные данные.");
     }
 
     @Override
@@ -164,15 +161,16 @@ public class ReviewDbStorage implements ReviewStorage {
             return "Дизлайк удален";
         }
 
-        log.debug("{}: " + "Дизлайк не был добавлен", IllegalIdException.class.getSimpleName());
-        throw new IllegalIdException("Дизлайк не был добавлен", "Проверьте введенные данные");
+        log.debug("{}: {}.", IllegalIdException.class.getSimpleName(), "Дизлайк не был добавлен.");
+        throw new IllegalIdException("Дизлайк не был добавлен.", "Проверьте введенные данные.");
     }
 
     /*------Вспомогательные методы------*/
     private void checkParameters(Review review) {
         if (review.getUserId() == null || review.getFilmId() == null || review.getContent() == null
                 || review.getIsPositive() == null) {
-            log.debug("{}: " + "Некорректные данные отзыва.", IncorrectRequestParameterException.class.getSimpleName());
+            log.debug("{}: {}.", IncorrectRequestParameterException.class.getSimpleName(),
+                    "Некорректные данные отзыва.");
             throw new IncorrectRequestParameterException("Некорректные данные отзыва.", "Проверьте данные отзыва.");
         }
     }
@@ -190,6 +188,7 @@ public class ReviewDbStorage implements ReviewStorage {
                                                       "AND user_id = ? " +
                                                       "AND is_like = ?;", Integer.class, reviewId, userId, isLike);
         if (count == 0) {
+            log.error("Лайк или дизлайк ещё не были поставлены отзыву с id = {}", reviewId);
             return false;
         }
         return true;

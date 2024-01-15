@@ -56,16 +56,16 @@ public class UserDbStorage implements UserStorage {
             Long userId = insertUser.executeAndReturnKey(userToMap(newUser)).longValue();
             newUser.setId(userId);
         } else if (getUserById(newUser.getId()) != null) {
-            log.debug("{}: " + USER_ALREADY_EXIST_MESSAGE + newUser.getId(),
-                    AlreadyExistException.class.getSimpleName());
+            log.debug("{}: {}{}.", AlreadyExistException.class.getSimpleName(),
+                    USER_ALREADY_EXIST_MESSAGE, newUser.getId());
             throw new AlreadyExistException(USER_ALREADY_EXIST_MESSAGE + newUser.getId(), USER_ALREADY_EXIST_ADVICE);
         } else if (newUser.getId() != null) {
-            log.debug("{}: " + ILLEGAL_NEW_USER_ID_MESSAGE + newUser.getId(),
-                    IllegalIdException.class.getSimpleName());
+            log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(),
+                    ILLEGAL_NEW_USER_ID_MESSAGE, newUser.getId());
             throw new IllegalIdException(ILLEGAL_NEW_USER_ID_MESSAGE + newUser.getId(), ILLEGAL_NEW_USER_ID_ADVICE);
         }
 
-        log.debug("Добавлен новый пользователь: " + newUser.getLogin() + ", с id = " + newUser.getId());
+        log.debug("Добавлен новый пользователь: {} с id = {}.", newUser.getLogin(), newUser.getId());
         return newUser;
     }
 
@@ -83,14 +83,14 @@ public class UserDbStorage implements UserStorage {
                     newUser.getBirthday(),
                     newUser.getId());
 
-            log.debug("Обновлена информация о пользователе: " + newUser.getLogin() + ", с id = " + newUser.getId());
+            log.debug("Обновлена информация о пользователе: {} с id = {}.", newUser.getLogin(), newUser.getId());
         } else if (newUser.getId() == null) {
             addUser(newUser);
-            log.debug("Добавлен новый пользователь: " + newUser.getLogin() + ", с id = " + newUser.getId());
+            log.debug("Добавлен новый пользователь: {} с id = {}.", newUser.getLogin(), newUser.getId());
         } else {
-            log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + newUser.getId(),
-                    IllegalIdException.class.getSimpleName());
-            throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + newUser.getId(), ILLEGAL_USER_ID_ADVICE);
+            log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(),
+                    ILLEGAL_NEW_USER_ID_MESSAGE, newUser.getId());
+            throw new IllegalIdException(ILLEGAL_NEW_USER_ID_MESSAGE + newUser.getId(), ILLEGAL_NEW_USER_ID_ADVICE);
         }
 
         return newUser;
@@ -112,7 +112,7 @@ public class UserDbStorage implements UserStorage {
 
             return user;
         }
-        log.debug("{}: {}", IllegalIdException.class.getSimpleName(), ILLEGAL_USER_ID_MESSAGE + userId);
+        log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_USER_ID_MESSAGE, userId);
         throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + userId, ILLEGAL_USER_ID_ADVICE);
     }
 
@@ -139,8 +139,9 @@ public class UserDbStorage implements UserStorage {
 
             return ADD_TO_FRIEND_MESSAGE + id + ", " + friendId;
         } else {
-            log.error("Неверно указаны id пользователей для добавления в друзья {}, {}", id, friendId);
-            throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE + id + ", " + friendId, ILLEGAL_OBJECTS_ID_ADVICE);
+            log.error("{}: {}{} и {}.", IllegalIdException.class.getSimpleName(),
+                    ILLEGAL_OBJECTS_ID_MESSAGE, id, friendId);
+            throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE + id + " и " + friendId, ILLEGAL_OBJECTS_ID_ADVICE);
         }
     }
 
@@ -153,8 +154,9 @@ public class UserDbStorage implements UserStorage {
             Events.addEvent(jdbcTemplate, EventType.FRIEND, EventOperation.REMOVE, id, friendId);
             return REMOVE_FROM_FRIEND_MESSAGE + id + ", " + friendId;
         } else {
-            log.error("Неверно указаны id пользователей для удаления из друзей {}, {}", id, friendId);
-            throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE + id + ", " + friendId, ILLEGAL_OBJECTS_ID_ADVICE);
+            log.error("{}: {}{} и {}.", IllegalIdException.class.getSimpleName(),
+                    ILLEGAL_OBJECTS_ID_MESSAGE, id, friendId);
+            throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE + id + " и " + friendId, ILLEGAL_OBJECTS_ID_ADVICE);
         }
     }
 
@@ -164,7 +166,7 @@ public class UserDbStorage implements UserStorage {
             String sqlQuery = SQL_QUERY_GET_ALL_FRIEND_LIST;
             return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id);
         } else {
-            log.error("Пользователь с id {} еще не добавлен.", id);
+            log.error("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_USER_ID_MESSAGE, id);
             throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + id, ILLEGAL_USER_ID_ADVICE);
         }
     }
@@ -175,7 +177,8 @@ public class UserDbStorage implements UserStorage {
             String sqlQuery = SQL_QUERY_GET_COMMON_FRIENDS;
             return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id, otherId);
         } else {
-            log.error("Неверно указаны id пользователей для отображения общих друзей {}, {}", id, otherId);
+            log.error("{}: {}{} и {}.", IllegalIdException.class.getSimpleName(),
+                    ILLEGAL_OBJECTS_ID_MESSAGE, id, otherId);
             throw new IllegalIdException(ILLEGAL_OBJECTS_ID_MESSAGE, ILLEGAL_OBJECTS_ID_ADVICE);
         }
     }
@@ -233,7 +236,7 @@ public class UserDbStorage implements UserStorage {
             String sqlQuery = SQL_QUERY_GET_EVENT_FEED;
             return jdbcTemplate.query(sqlQuery, Events::mapRowToEvent, userId);
         } else {
-            log.debug("{}: " + ILLEGAL_USER_ID_MESSAGE + userId, IllegalIdException.class.getSimpleName());
+            log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_USER_ID_MESSAGE, userId);
             throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + userId, ILLEGAL_USER_ID_ADVICE);
         }
     }
@@ -270,7 +273,7 @@ public class UserDbStorage implements UserStorage {
             final User newUser = user.toBuilder()
                     .name(user.getLogin())
                     .build();
-            log.debug("User.name = " + user.getName() + ", заменяем User.name на User.login = " + user.getLogin());
+            log.debug("Заменяем имя пользователя = {}, на его логин = {}.", user.getName(), user.getLogin());
             return newUser;
         }
 
