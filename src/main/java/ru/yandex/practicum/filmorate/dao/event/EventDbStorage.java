@@ -18,7 +18,6 @@ import java.util.Map;
 
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_USER_ID_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_USER_ID_MESSAGE;
-import static ru.yandex.practicum.filmorate.query.SqlQuery.SQL_QUERY_GET_EVENT_FEED;
 
 @Repository
 @Slf4j
@@ -53,7 +52,10 @@ public class EventDbStorage implements EventStorage{
     @Override
     public List<Event> getEventFeed(Long userId) {
         if (checkIfUserExists(userId)) {
-            String sqlQuery = SQL_QUERY_GET_EVENT_FEED;
+            String sqlQuery =
+                    "SELECT * " +
+                    "FROM event_feed " +
+                    "WHERE user_id = ?;";
             return jdbcTemplate.query(sqlQuery, this::mapRowToEvent, userId);
         } else {
             log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_USER_ID_MESSAGE, userId);

@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.FILM_ALREADY_EXIST_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.FILM_ALREADY_EXIST_MESSAGE;
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.*;
-import static ru.yandex.practicum.filmorate.query.SqlQuery.*;
 
 @Repository
 @Slf4j
@@ -73,7 +72,13 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         if (checkIfFilmExists(film.getId())) {
             Film savedFilm = getFilmById(film.getId());
-            jdbcTemplate.update(SQL_QUERY_UPDATE_FILM,
+            jdbcTemplate.update(
+                    "UPDATE FILMS SET name = ?, " +
+                                     "release_date = ?, " +
+                                     "description = ?, " +
+                                     "duration = ?, " +
+                                     "mpa_rating_id = ? " +
+                    "WHERE film_id = ?;",
                     film.getName(),
                     film.getReleaseDate(),
                     film.getDescription(),
@@ -117,7 +122,17 @@ public class FilmDbStorage implements FilmStorage {
     /*---Получить список всех Film---*/
     @Override
     public List<Film> getAllFilms() {
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS, getFilmMapper());
+        List<Film> films = jdbcTemplate.query(
+                "SELECT f.film_id, " +
+                       "f.name, " +
+                       "f.release_date, " +
+                       "f.description, " +
+                       "f.duration, " +
+                      "mp.mpa_rating_id, " +
+                      "mp.name AS mpa_name " +
+                "FROM FILMS AS f " +
+                "JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id);",
+                getFilmMapper());
         setGenreForFilms(films);
         setDirectorForFilms(films);
         return films;
@@ -127,7 +142,17 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film getFilmById(Long filmId) {
         if (checkIfFilmExists(filmId)) {
-            Film film = jdbcTemplate.queryForObject(SQL_QUERY_GET_FILM_BY_ID, getFilmMapper(), filmId);
+            Film film = jdbcTemplate.queryForObject(
+                    "SELECT f.film_id, " +
+                           "f.name, " +
+                           "f.release_date, " +
+                           "f.description, " +
+                           "f.duration, " +
+                           "mp.mpa_rating_id, " +
+                           "mp.name AS mpa_name " +
+                    "FROM FILMS AS f " +
+                    "JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id) " +
+                    "WHERE f.film_id = ?;", getFilmMapper(), filmId);
             setGenreForFilm(film);
             setDirectorsForFilm(film);
             return film;
@@ -141,7 +166,20 @@ public class FilmDbStorage implements FilmStorage {
         if (checkIfDirectorExists(directorId)) {
             String orderByClause = sortByLikes ? "ORDER BY COUNT(fl.film_likes_id) ASC;" :
                     "ORDER BY f.release_date ASC;";
-            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_ALL_FILMS_BY_DIRECTOR + orderByClause,
+            List<Film> films = jdbcTemplate.query(
+                    "SELECT f.film_id, " +
+                            "f.name, " +
+                            "f.release_date, " +
+                            "f.description, " +
+                            "f.duration, " +
+                            "mp.mpa_rating_id, " +
+                            "mp.name AS mpa_name " +
+                    "FROM FILMS AS f " +
+                    "LEFT OUTER JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id) " +
+                    "LEFT OUTER JOIN film_directors AS fd ON (f.film_id = fd.film_id) " +
+                    "LEFT OUTER JOIN film_likes AS fl ON (f.film_id = fl.film_id) " +
+                    "WHERE fd.directors_id = ? " +
+                    "GROUP BY f.film_id " + orderByClause,
                     getFilmMapper(), directorId);
             setGenreForFilms(films);
             setDirectorForFilms(films);
@@ -154,7 +192,22 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> searchFilmsByDirector(String query) {
         String searchQuery = "%" + query + "%";
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_DIRECTOR, getFilmMapper(),
+        List<Film> films = jdbcTemplate.query(
+                "SELECT f.film_id, " +
+                       "f.name, " +
+                       "f.release_date, " +
+                       "f.description, " +
+                       "f.duration, " +
+                       "mp.mpa_rating_id, " +
+                       "mp.name AS mpa_name " +
+                "FROM FILMS AS f " +
+                "LEFT OUTER JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id) " +
+                "LEFT OUTER JOIN film_likes AS fl ON (f.film_id = fl.film_id) " +
+                "LEFT OUTER JOIN film_directors AS fd ON (f.film_id = fd.film_id) " +
+                "LEFT OUTER JOIN directors AS d ON (fd.directors_id = d.directors_id) " +
+                "WHERE UPPER(d.name) LIKE ? " +
+                "GROUP BY f.film_id " +
+                "ORDER BY COUNT(fl.user_id) DESC;", getFilmMapper(),
                 searchQuery.toUpperCase());
         setGenreForFilms(films);
         setDirectorForFilms(films);
@@ -164,7 +217,20 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> searchFilmsByTitle(String query) {
         String searchQuery = "%" + query + "%";
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE, getFilmMapper(),
+        List<Film> films = jdbcTemplate.query(
+                "SELECT f.film_id, " +
+                       "f.name, " +
+                       "f.release_date, " +
+                       "f.description, " +
+                       "f.duration, " +
+                       "mp.mpa_rating_id, " +
+                       "mp.name AS mpa_name " +
+                "FROM FILMS AS f " +
+                "LEFT OUTER JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id) " +
+                "LEFT OUTER JOIN film_likes AS fl ON (f.film_id = fl.film_id) " +
+                "WHERE UPPER(f.name) LIKE ? " +
+                "GROUP BY f.film_id " +
+                "ORDER BY COUNT(fl.user_id) DESC;", getFilmMapper(),
                 searchQuery.toUpperCase());
         setGenreForFilms(films);
         setDirectorForFilms(films);
@@ -174,7 +240,23 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> searchFilmsByTitleAndDirector(String query) {
         String searchQuery = "%" + query + "%";
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_SEARCH_FILMS_BY_TITLE_AND_DIRECTOR, getFilmMapper(),
+        List<Film> films = jdbcTemplate.query(
+                "SELECT f.film_id, " +
+                       "f.name, " +
+                       "f.release_date, " +
+                       "f.description, " +
+                       "f.duration, " +
+                       "mp.mpa_rating_id, " +
+                       "mp.name AS mpa_name " +
+                "FROM FILMS AS f " +
+                "LEFT OUTER JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id) " +
+                "LEFT OUTER JOIN film_likes AS fl ON (f.film_id = fl.film_id) " +
+                "LEFT OUTER JOIN film_directors AS fd ON (f.film_id = fd.film_id) " +
+                "LEFT OUTER JOIN directors AS d ON (fd.directors_id = d.directors_id) " +
+                "WHERE UPPER(d.name) LIKE ? " +
+                "OR UPPER(f.name) LIKE ? " +
+                "GROUP BY f.film_id " +
+                "ORDER BY COUNT(fl.user_id) DESC;", getFilmMapper(),
                 searchQuery.toUpperCase(), searchQuery.toUpperCase());
         setGenreForFilms(films);
         setDirectorForFilms(films);
@@ -185,7 +267,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteFilmById(Long filmId) {
         if (checkIfFilmExists(filmId)) {
-            jdbcTemplate.update(SQL_QUERY_DELETE_FILM_BY_ID, filmId);
+            jdbcTemplate.update("DELETE FROM FILMS " +
+                                "WHERE film_id = ?;", filmId);
         } else {
             log.error("фильм с id {} еще не добавлен.", filmId);
             throw new IllegalIdException(ILLEGAL_FILM_ID_MESSAGE + filmId, ILLEGAL_FILM_ID_ADVICE);
@@ -195,7 +278,8 @@ public class FilmDbStorage implements FilmStorage {
     /*---Поставить лайк фильму---*/
     public String addLikeToFilm(Long id, Long userId) {
         if (checkIfFilmExists(id) && checkIfUserExists(userId)) {
-            jdbcTemplate.update(SQL_QUERY_FILM_ADD_LIKE, id, userId);
+            jdbcTemplate.update("INSERT INTO film_likes(film_id, user_id) " +
+                                "VALUES(?, ?);", id, userId);
             // добавляем Event в БД:
             EventDbStorage.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.ADD, userId, id);
         } else {
@@ -209,7 +293,9 @@ public class FilmDbStorage implements FilmStorage {
     /*---Удалить лайк---*/
     public String removeLikeFromFilm(Long id, Long userId) {
         if (checkIfFilmExists(id) && checkIfUserExists(userId)) {
-            jdbcTemplate.update(SQL_QUERY_REMOVE_LIKE_FROM_FILM, userId, id);
+            jdbcTemplate.update("DELETE FROM film_likes " +
+                                "WHERE user_id = ? " +
+                                "AND film_id = ?;", userId, id);
             // добавляем Event в БД:
             EventDbStorage.addEvent(jdbcTemplate, EventType.LIKE, EventOperation.REMOVE, userId, id);
         } else {
@@ -222,7 +308,21 @@ public class FilmDbStorage implements FilmStorage {
 
     /*---Получить топ фильмов по популярности---*/
     public List<Film> getTopFilmsForLikes(Integer count) {
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES + JUST_TOP_FILMS,
+        List<Film> films = jdbcTemplate.query(
+                "SELECT f.film_id, " +
+                       "f.name, " +
+                       "f.release_date, " +
+                       "f.description, " +
+                       "f.duration, " +
+                       "mp.mpa_rating_id, " +
+                       "mp.name AS mpa_name " +
+                "FROM FILMS AS f " +
+                "LEFT OUTER JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id) " +
+                "LEFT OUTER JOIN film_likes AS fl ON (f.film_id = fl.film_id) " +
+                "GROUP BY f.film_id, " +
+                "fl.user_id " +
+                "ORDER BY COUNT(fl.user_id) DESC " +
+                "LIMIT ?;",
                 getFilmMapper(), count);
         setGenreForFilms(films);
         setDirectorForFilms(films);
@@ -230,7 +330,23 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_COMMON_FILMS, getFilmMapper(), userId, friendId);
+        List<Film> films = jdbcTemplate.query(
+                "SELECT fl1.film_id, " +
+                       "f.name, " +
+                       "f.description, " +
+                       "f.release_date, " +
+                       "f.duration, " +
+                       "mr.mpa_rating_id, " +
+                       "mr.name AS mpa_name " +
+                "FROM films AS f " +
+                "LEFT OUTER JOIN mpa_rating AS mr ON (f.mpa_rating_id = mr.mpa_rating_id) " +
+                "JOIN film_likes AS fl1 ON (fl1.film_id = f.film_id) " +
+                "JOIN film_likes AS fl2 ON (fl2.film_id = f.film_id) " +
+                "JOIN film_likes AS fl3 ON (fl3.film_id = f.film_id) " +
+                "WHERE fl1.user_id = ? " +
+                  "AND fl2.user_id = ? " +
+                "GROUP BY fl1.film_id " +
+                "ORDER BY COUNT(fl1.USER_ID) DESC;", getFilmMapper(), userId, friendId);
         setGenreForFilms(films);
         setDirectorForFilms(films);
         return films;
@@ -239,9 +355,27 @@ public class FilmDbStorage implements FilmStorage {
     /*---Получаем список топ фильмов по количеству лайков в размере {count},
     указанного жанра {genreId} за нужный год {year}---*/
     public List<Film> getTopFilmsForLikesWithYearAndGenreFilter(Integer count, Long genreId, Integer year) {
+        // часть запроса на получение топа фильмов:
+        String sglQuery =
+                "SELECT f.film_id, " +
+                       "f.name, " +
+                       "f.release_date, " +
+                       "f.description, " +
+                       "f.duration, " +
+                       "mp.mpa_rating_id, " +
+                       "mp.name AS mpa_name " +
+                "FROM FILMS AS f " +
+                "LEFT OUTER JOIN mpa_rating AS mp ON (f.mpa_rating_id = mp.mpa_rating_id) " +
+                "LEFT OUTER JOIN film_likes AS fl ON (f.film_id = fl.film_id) ";
         if (genreId == 0) {
             // топ с фильтром по году {year}:
-            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES + TOP_FILMS_WITH_YEAR_FILTER,
+            List<Film> films = jdbcTemplate.query(
+                    sglQuery +
+                    "WHERE EXTRACT (YEAR FROM CAST (f.release_date AS date)) = ? " +
+                    "GROUP BY f.film_id, " +
+                             "fl.user_id " +
+                    "ORDER BY COUNT(fl.user_id) DESC " +
+                    "LIMIT ?;",
                     getFilmMapper(), year, count);
             setGenreForFilms(films);
             setDirectorForFilms(films);
@@ -249,7 +383,14 @@ public class FilmDbStorage implements FilmStorage {
 
         } else if (year == null) {
             // топ с фильтром по жанру {genreId}:
-            List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES + TOP_FILMS_WITH_GENRE_FILTER,
+            List<Film> films = jdbcTemplate.query(
+                    sglQuery +
+                    "LEFT OUTER JOIN film_genres AS fg ON (f.film_id = fg.film_id) " +
+                    "WHERE fg.genre_id = ? " +
+                    "GROUP BY f.film_id, " +
+                    "fl.user_id " +
+                    "ORDER BY COUNT(fl.user_id) DESC " +
+                    "LIMIT ?;",
                     getFilmMapper(), genreId, count);
             setGenreForFilms(films);
             setDirectorForFilms(films);
@@ -257,8 +398,15 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         // топ с фильтром по жанру {genreId} и году {year}:
-        List<Film> films = jdbcTemplate.query(SQL_QUERY_GET_TOP_FILMS_FOR_LIKES
-                + TOP_FILMS_WITH_GENRE_AND_YEAR_FILTER, getFilmMapper(), genreId, year, count);
+        List<Film> films = jdbcTemplate.query(
+                sglQuery +
+                "LEFT OUTER JOIN film_genres AS fg ON (f.film_id = fg.film_id) " +
+                "WHERE fg.genre_id = ? " +
+                "AND EXTRACT (YEAR FROM CAST (f.release_date AS date)) = ? " +
+                "GROUP BY f.film_id, " +
+                         "fl.user_id " +
+                "ORDER BY COUNT(fl.user_id) DESC " +
+                "LIMIT ?;", getFilmMapper(), genreId, year, count);
         setGenreForFilms(films);
         setDirectorForFilms(films);
         return films;

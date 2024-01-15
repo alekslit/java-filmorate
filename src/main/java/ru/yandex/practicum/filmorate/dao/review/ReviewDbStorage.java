@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.*;
-import static ru.yandex.practicum.filmorate.query.SqlQuery.*;
 
 @Slf4j
 @Repository
@@ -34,7 +33,10 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Review findReviewById(Long reviewId) {
         if (checkIfReviewExists(reviewId)) {
-            Review review = jdbcTemplate.queryForObject(SQL_QUERY_FIND_REVIEW_BY_ID, getReviewMapper(), reviewId);
+            Review review = jdbcTemplate.queryForObject(
+                    "SELECT * " +
+                    "FROM REVIEWS " +
+                    "WHERE review_id = ?;", getReviewMapper(), reviewId);
             return review;
         } else {
             log.error("Отзыв с id {} еще не добавлен.", reviewId);
@@ -67,7 +69,8 @@ public class ReviewDbStorage implements ReviewStorage {
         checkParameters(review);
         if (checkIfReviewExists(review.getReviewId()) && checkIfUserExists(review.getUserId())
                 && checkIfFilmExists(review.getFilmId())) {
-            jdbcTemplate.update(SQL_QUERY_UPDATE_REVIEW_BY_ID, review.getContent(),
+            jdbcTemplate.update("UPDATE REVIEWS SET content = ?, is_positive = ? " +
+                                "WHERE review_id = ?;", review.getContent(),
                     review.getIsPositive(), review.getReviewId());
             // добавляем Event в БД:
             EventDbStorage.addEvent(jdbcTemplate, EventType.REVIEW, EventOperation.UPDATE,
@@ -106,7 +109,12 @@ public class ReviewDbStorage implements ReviewStorage {
     public List<Review> findAllReviews(Long filmId, Integer count) {
         if (filmId != null) {
             if (checkIfFilmExists(filmId)) {
-                List<Review> reviews = jdbcTemplate.query(SQL_QUERY_FIND_ALL_REVIEWS_BY_ID, getReviewMapper(), filmId, count);
+                List<Review> reviews = jdbcTemplate.query(
+                        "SELECT * " +
+                        "FROM REVIEWS " +
+                        "WHERE film_id = ? " +
+                        "ORDER BY useful DESC " +
+                        "LIMIT ?;", getReviewMapper(), filmId, count);
                 return reviews;
             } else {
                 log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_FILM_ID_MESSAGE, filmId);
@@ -114,13 +122,17 @@ public class ReviewDbStorage implements ReviewStorage {
             }
         }
 
-        List<Review> reviews = jdbcTemplate.query(SQL_QUERY_FIND_ALL_REVIEWS, getReviewMapper(), count);
+        List<Review> reviews = jdbcTemplate.query(
+                "SELECT * FROM REVIEWS " +
+                "ORDER BY useful DESC " +
+                "LIMIT ?;", getReviewMapper(), count);
         return reviews;
     }
 
     public String likeReview(Long reviewId, Long userId) {
         if (!checkIfLikeOrDislikeAdded(reviewId, userId, true)) {
-            jdbcTemplate.update(SQL_QUERY_LIKE_OR_DISLIKE_REVIEW, reviewId, userId, true);
+            jdbcTemplate.update("INSERT INTO review_likes (review_id, user_id, is_like) " +
+                                "VALUES(?, ?, ?);", reviewId, userId, true);
             updateUsefulProperty(reviewId, 1);
             return "Лайк добавлен";
         }
@@ -132,7 +144,8 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public String dislikeReview(Long reviewId, Long userId) {
         if (!checkIfLikeOrDislikeAdded(reviewId, userId, false)) {
-            jdbcTemplate.update(SQL_QUERY_LIKE_OR_DISLIKE_REVIEW, reviewId, userId, false);
+            jdbcTemplate.update("INSERT INTO review_likes (review_id, user_id, is_like) " +
+                                "VALUES(?, ?, ?);", reviewId, userId, false);
             updateUsefulProperty(reviewId, -1);
             return "Дизлайк добавлен";
         }
@@ -144,7 +157,11 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public String removeLikeFromReview(Long reviewId, Long userId) {
         if (checkIfLikeOrDislikeAdded(reviewId, userId, true)) {
-            jdbcTemplate.update(SQL_QUERY_REMOVE_LIKE_OR_DISLIKE_FROM_REVIEW, reviewId, userId, true);
+            jdbcTemplate.update(
+                    "DELETE FROM review_likes " +
+                    "WHERE review_id = ? " +
+                    "AND userId = ? " +
+                    "AND is_like = ?;", reviewId, userId, true);
             updateUsefulProperty(reviewId, -1);
             return "Лайк удален";
         }
@@ -156,7 +173,11 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public String removeDislikeFromReview(Long reviewId, Long userId) {
         if (checkIfLikeOrDislikeAdded(reviewId, userId, false)) {
-            jdbcTemplate.update(SQL_QUERY_REMOVE_LIKE_OR_DISLIKE_FROM_REVIEW, reviewId, userId, false);
+            jdbcTemplate.update(
+                    "DELETE FROM review_likes " +
+                    "WHERE review_id = ? " +
+                      "AND userId = ? " +
+                      "AND is_like = ?;", reviewId, userId, false);
             updateUsefulProperty(reviewId, 1);
             return "Дизлайк удален";
         }

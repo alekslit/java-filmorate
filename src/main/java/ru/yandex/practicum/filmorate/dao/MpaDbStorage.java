@@ -13,8 +13,6 @@ import java.util.List;
 
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_MPA_ID_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_MPA_ID_MESSAGE;
-import static ru.yandex.practicum.filmorate.query.SqlQuery.SQL_QUERY_GET_ALL_MPA;
-import static ru.yandex.practicum.filmorate.query.SqlQuery.SQL_QUERY_GET_MPA_BY_ID;
 
 @Repository
 @Slf4j
@@ -29,7 +27,10 @@ public class MpaDbStorage {
     /*---Получение MPA-рейтинга по его id---*/
     public Mpa getMpaById(Integer mpaId) {
         if (checkIfMpaExists(mpaId)) {
-            String sqlQuery = SQL_QUERY_GET_MPA_BY_ID;
+            String sqlQuery =
+                    "SELECT * " +
+                    "FROM mpa_rating " +
+                    "WHERE mpa_rating_id = ?;";
             Mpa mpa = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToMpa, mpaId);
 
             return mpa;
@@ -40,7 +41,9 @@ public class MpaDbStorage {
 
     /*---Получение списка всех MPA-рейтингов---*/
     public List<Mpa> getAllMpa() {
-        String sqlQuery = SQL_QUERY_GET_ALL_MPA;
+        String sqlQuery =
+                "SELECT * " +
+                "FROM mpa_rating;";
         return jdbcTemplate.query(sqlQuery, this::mapRowToMpa);
     }
 

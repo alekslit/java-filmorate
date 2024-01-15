@@ -13,8 +13,6 @@ import java.util.List;
 
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_GENRE_ID_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_GENRE_ID_MESSAGE;
-import static ru.yandex.practicum.filmorate.query.SqlQuery.SQL_QUERY_GET_ALL_GENRES;
-import static ru.yandex.practicum.filmorate.query.SqlQuery.SQL_QUERY_GET_GENRE_BY_ID;
 
 @Slf4j
 @Repository
@@ -29,7 +27,10 @@ public class GenreDbStorage {
     /*---Получение жанра по его id---*/
     public Genre getGenreById(Integer genreId) {
         if (checkIfGenreExists(genreId)) {
-            String sqlQuery = SQL_QUERY_GET_GENRE_BY_ID;
+            String sqlQuery =
+                    "SELECT * " +
+                    "FROM genre " +
+                    "WHERE genre_id = ?;";
             Genre genre = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, genreId);
 
             return genre;
@@ -40,7 +41,9 @@ public class GenreDbStorage {
 
     /*---Получение списка всех жанров---*/
     public List<Genre> getAllGenres() {
-        String sqlQuery = SQL_QUERY_GET_ALL_GENRES;
+        String sqlQuery =
+                "SELECT * " +
+                "FROM genre;";
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }
 

@@ -15,7 +15,6 @@ import java.util.Map;
 
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_DIRECTOR_ID_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_DIRECTOR_ID_MESSAGE;
-import static ru.yandex.practicum.filmorate.query.SqlQuery.*;
 
 @Repository
 @Slf4j
@@ -26,7 +25,9 @@ public class DirectorDbStorage implements DirectorStorage {
     /*---Основные методы---*/
     @Override
     public List<Director> getAllDirectors() {
-        String query = SQL_QUERY_GET_ALL_DIRECTORS;
+        String query =
+                "SELECT * " +
+                "FROM directors;";
         log.info("SELECT all Directors from DB");
         return jdbcTemplate.query(query, this::mapRowToDirector);
     }
@@ -34,7 +35,10 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Director getByIdDirector(Integer id) {
         if (checkIfDirectorExists(id)) {
-            String query = SQL_QUERY_GET_BY_ID_DIRECTOR;
+            String query =
+                    "SELECT * " +
+                    "FROM directors " +
+                    "WHERE directors_id = ?;";
             log.info("SELECT request to DB Directors by id= {}", id);
 
             return jdbcTemplate.queryForObject(query, this::mapRowToDirector, id);
@@ -56,7 +60,9 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Director updateDirector(Director director) {
         if (getByIdDirector(director.getId()) != null) {
-            String query = SQL_QUERY_UPDATE_DIRECTOR;
+            String query =
+                    "UPDATE directors SET name = ? " +
+                    "WHERE directors_id = ?;";
             log.info("UPDATE request to DB Directors: {}", director.getName());
             jdbcTemplate.update(query, director.getName(), director.getId());
         }
