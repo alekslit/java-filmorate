@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.function.Function.identity;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.FILM_ALREADY_EXIST_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.FILM_ALREADY_EXIST_MESSAGE;
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.*;
@@ -533,9 +534,21 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public void setGenreForFilms(List<Film> films) {
-        Map<Long, List<FilmGenre>> filmGenreMap = getFilmGenreMap(getFilmsId(films));
+       /* Map<Long, List<FilmGenre>> filmGenreMap = getFilmGenreMap(getFilmsId(films));
         films.forEach(film -> film.setGenres(getGenresForFilm(film.getId(), filmGenreMap)));
-        films.forEach(this::sortGenres);
+        films.forEach(this::sortGenres);*/
+
+        //final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, identity()));
+        //Таким образом, далее,
+        // при получении жанров по коллекции идентификаторов фильмов,
+        // при извлечении записи о жанре,
+        // можно будет обращаться к этой мапе для получения фильма за O(1)
+        final Map<Long, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, identity()));
+        List<FilmGenre> filmGenresList = getFilmGenreMap(getFilmsId(films));
+        filmGenresList.stream()
+                .
+
+
     }
 
     public void setDirectorForFilms(List<Film> films) {
@@ -544,10 +557,12 @@ public class FilmDbStorage implements FilmStorage {
         films.forEach(this::sortDirectors);
     }
 
-    private Map<Long, List<FilmGenre>> getFilmGenreMap(List<Long> filmsId) {
+    //private Map<Long, List<FilmGenre>> getFilmGenreMap(List<Long> filmsId) {
+    private List<FilmGenre> getFilmGenreMap(List<Long> filmsId) { //todo name
         List<FilmGenre> genres = getGenres(filmsId);
-        return genres.stream()
-                .collect(Collectors.groupingBy(FilmGenre::getFilmId));
+        return genres;
+                //genres.stream()
+                //.collect(Collectors.groupingBy(FilmGenre::getFilmId));
     }
 
     private Map<Long, List<FilmDirector>> getFilmDirectorsMap(List<Long> filmsId) {
