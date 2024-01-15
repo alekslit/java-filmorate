@@ -21,7 +21,7 @@ import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL
 
 @Repository
 @Slf4j
-public class EventDbStorage implements EventStorage{
+public class EventDbStorage implements EventStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
