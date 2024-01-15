@@ -27,7 +27,7 @@ public class DirectorDbStorage implements DirectorStorage {
     public List<Director> getAllDirectors() {
         String query =
                 "SELECT * " +
-                        "FROM directors;";
+                "FROM directors;";
         log.info("SELECT all Directors from DB");
         return jdbcTemplate.query(query, this::mapRowToDirector);
     }
@@ -37,8 +37,8 @@ public class DirectorDbStorage implements DirectorStorage {
         if (checkIfDirectorExists(id)) {
             String query =
                     "SELECT * " +
-                            "FROM directors " +
-                            "WHERE directors_id = ?;";
+                    "FROM directors " +
+                    "WHERE directors_id = ?;";
             log.info("SELECT request to DB Directors by id= {}", id);
 
             return jdbcTemplate.queryForObject(query, this::mapRowToDirector, id);
@@ -62,7 +62,7 @@ public class DirectorDbStorage implements DirectorStorage {
         if (getByIdDirector(director.getId()) != null) {
             String query =
                     "UPDATE directors SET name = ? " +
-                            "WHERE directors_id = ?;";
+                    "WHERE directors_id = ?;";
             log.info("UPDATE request to DB Directors: {}", director.getName());
             jdbcTemplate.update(query, director.getName(), director.getId());
         }
@@ -73,17 +73,10 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public void deleteDirector(Integer id) {
         String deleteQuery = "DELETE " +
-                "FROM directors " +
-                "WHERE directors_id = ?;";
-        String updateQuery = "UPDATE directors " +
-                "SET directors_id = directors_id - 1 " +
-                "WHERE directors_id > ?;";
-
+                             "FROM directors " +
+                             "WHERE directors_id = ?;";
         // Удаление режиссера
         jdbcTemplate.update(deleteQuery, id);
-
-        // Обновление последующих идентификаторов режиссеров
-        jdbcTemplate.update(updateQuery, id);
     }
 
     /*---Вспомогательные методы---*/
