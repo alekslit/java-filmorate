@@ -29,8 +29,8 @@ public class GenreDbStorage {
         if (checkIfGenreExists(genreId)) {
             String sqlQuery =
                     "SELECT * " +
-                            "FROM genre " +
-                            "WHERE genre_id = ?;";
+                    "FROM genre " +
+                    "WHERE genre_id = ?;";
             Genre genre = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, genreId);
 
             return genre;
@@ -43,7 +43,7 @@ public class GenreDbStorage {
     public List<Genre> getAllGenres() {
         String sqlQuery =
                 "SELECT * " +
-                        "FROM genre;";
+                "FROM genre;";
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }
 
@@ -59,8 +59,8 @@ public class GenreDbStorage {
 
     private boolean checkIfGenreExists(Integer id) {
         Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
-                "FROM genre " +
-                "WHERE genre_id = ?;", Integer.class, id);
+                                                     "FROM genre " +
+                                                     "WHERE genre_id = ?;", Integer.class, id);
         if (result == 0) {
             log.error("жанр с id = {} еще не добавлен.", id);
             return false;

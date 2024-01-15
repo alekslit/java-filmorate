@@ -15,7 +15,8 @@ public class SortByConverter implements Converter<String, SortBy> {
         } else if (source.equalsIgnoreCase("title,director")) {
             return SortBy.TITLE_DIRECTOR;
         } else {
-            throw new IllegalArgumentException("Invalid 'by' parameter. Supported values are 'director', 'title', 'director,title' and 'title,director'");
+            throw new IllegalArgumentException("Invalid 'by' parameter. Supported values are 'director', " +
+                    "'title', 'director,title' and 'title,director'");
         }
     }
 }

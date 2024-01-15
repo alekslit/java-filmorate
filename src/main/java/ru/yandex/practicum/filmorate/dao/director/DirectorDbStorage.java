@@ -43,7 +43,7 @@ public class DirectorDbStorage implements DirectorStorage {
 
             return jdbcTemplate.queryForObject(query, this::mapRowToDirector, id);
         }
-        log.debug("{}: {}", IllegalIdException.class.getSimpleName(), ILLEGAL_DIRECTOR_ID_MESSAGE + id);
+        log.debug("{}: {}{}.", IllegalIdException.class.getSimpleName(), ILLEGAL_DIRECTOR_ID_MESSAGE, id);
         throw new IllegalIdException(ILLEGAL_DIRECTOR_ID_MESSAGE + id, ILLEGAL_DIRECTOR_ID_ADVICE);
     }
 
