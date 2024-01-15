@@ -2,19 +2,17 @@ package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
-import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException;
 import ru.yandex.practicum.filmorate.model.genre.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.GENRE_INVALID_DATA_BASE_QUERY_ADVICE;
-import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.INVALID_DATA_BASE_QUERY_MESSAGE;
+import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_GENRE_ID_ADVICE;
+import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_GENRE_ID_MESSAGE;
 import static ru.yandex.practicum.filmorate.query.SqlQuery.SQL_QUERY_GET_ALL_GENRES;
 import static ru.yandex.practicum.filmorate.query.SqlQuery.SQL_QUERY_GET_GENRE_BY_ID;
 
@@ -30,17 +28,14 @@ public class GenreDbStorage {
 
     /*---Получение жанра по его id---*/
     public Genre getGenreById(Integer genreId) {
-        try {
+        if (checkIfGenreExists(genreId)) {
             String sqlQuery = SQL_QUERY_GET_GENRE_BY_ID;
             Genre genre = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, genreId);
 
             return genre;
-        } catch (EmptyResultDataAccessException exception) {
-            log.debug("{}: " + INVALID_DATA_BASE_QUERY_MESSAGE + " Размер ответа на запрос: "
-                    + exception.getExpectedSize(), IllegalIdException.class.getSimpleName());
-            throw new InvalidDataBaseQueryException(INVALID_DATA_BASE_QUERY_MESSAGE, exception.getExpectedSize(),
-                    GENRE_INVALID_DATA_BASE_QUERY_ADVICE);
         }
+        log.debug("{}: {}", IllegalIdException.class.getSimpleName(), ILLEGAL_GENRE_ID_MESSAGE + genreId);
+        throw new IllegalIdException(ILLEGAL_GENRE_ID_MESSAGE + genreId, ILLEGAL_GENRE_ID_ADVICE);
     }
 
     /*---Получение списка всех жанров---*/
@@ -57,5 +52,16 @@ public class GenreDbStorage {
                 .build();
 
         return genre;
+    }
+
+    private boolean checkIfGenreExists(Integer id) {
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
+                                                     "FROM genre " +
+                                                     "WHERE genre_id = ?;", Integer.class, id);
+        if (result == 0) {
+            log.error("жанр с id {} еще не добавлен.", id);
+            return false;
+        }
+        return true;
     }
 }

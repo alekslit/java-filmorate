@@ -2,19 +2,17 @@ package ru.yandex.practicum.filmorate.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
-import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.INVALID_DATA_BASE_QUERY_MESSAGE;
-import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.MPA_INVALID_DATA_BASE_QUERY_ADVICE;
+import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_MPA_ID_ADVICE;
+import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_MPA_ID_MESSAGE;
 import static ru.yandex.practicum.filmorate.query.SqlQuery.SQL_QUERY_GET_ALL_MPA;
 import static ru.yandex.practicum.filmorate.query.SqlQuery.SQL_QUERY_GET_MPA_BY_ID;
 
@@ -30,17 +28,14 @@ public class MpaDbStorage {
 
     /*---Получение MPA-рейтинга по его id---*/
     public Mpa getMpaById(Integer mpaId) {
-        try {
+        if (checkIfMpaExists(mpaId)) {
             String sqlQuery = SQL_QUERY_GET_MPA_BY_ID;
             Mpa mpa = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToMpa, mpaId);
 
             return mpa;
-        } catch (EmptyResultDataAccessException exception) {
-            log.debug("{}: " + INVALID_DATA_BASE_QUERY_MESSAGE + " Размер ответа на запрос: "
-                    + exception.getExpectedSize(), IllegalIdException.class.getSimpleName());
-            throw new InvalidDataBaseQueryException(INVALID_DATA_BASE_QUERY_MESSAGE, exception.getExpectedSize(),
-                    MPA_INVALID_DATA_BASE_QUERY_ADVICE);
         }
+        log.debug("{}: {}", IllegalIdException.class.getSimpleName(), ILLEGAL_MPA_ID_MESSAGE + mpaId);
+        throw new IllegalIdException(ILLEGAL_MPA_ID_MESSAGE + mpaId, ILLEGAL_MPA_ID_ADVICE);
     }
 
     /*---Получение списка всех MPA-рейтингов---*/
@@ -57,5 +52,16 @@ public class MpaDbStorage {
                 .build();
 
         return mpa;
+    }
+
+    private boolean checkIfMpaExists(Integer id) {
+        Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) " +
+                                                     "FROM mpa_rating " +
+                                                     "WHERE mpa_rating_id = ?;", Integer.class, id);
+        if (result == 0) {
+            log.error("MPA-рейтинг с id {} еще не добавлен.", id);
+            return false;
+        }
+        return true;
     }
 }

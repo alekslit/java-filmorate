@@ -13,14 +13,14 @@ import ru.yandex.practicum.filmorate.model.ErrorResponse;
 @Slf4j
 public class ErrorHandler {
     /*---Обработчики для статуса 400 (Bad request)---*/
-    @ExceptionHandler
+    @ExceptionHandler({IncorrectRequestParameterException.class, AlreadyExistException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIncorrectRequestParameterException(final IncorrectRequestParameterException e) {
+    public ErrorResponse handleBadRequestException(final CustomException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error(e.getMessage())
                 .adviceToUser(e.getAdviceToUser())
                 .build();
-        log.debug("{}: " + e.getMessage(), IncorrectRequestParameterException.class.getSimpleName());
+        log.debug("{}: {}", e.getClass().getSimpleName(), e.getMessage());
 
         return errorResponse;
     }
@@ -32,57 +32,21 @@ public class ErrorHandler {
                 .error("Ошибка валидации данных из запроса.")
                 .adviceToUser(e.getFieldError().getDefaultMessage())
                 .build();
-        log.debug("{}: " + e.getFieldError().getDefaultMessage(),
-                MethodArgumentNotValidException.class.getSimpleName());
-
-        return errorResponse;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleAlreadyExistException(final AlreadyExistException e) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .error(e.getMessage())
-                .adviceToUser(e.getAdviceToUser())
-                .build();
-        log.debug("{}: " + e.getMessage(), AlreadyExistException.class.getSimpleName());
+        log.debug("{}: {}", MethodArgumentNotValidException.class.getSimpleName(),
+                e.getFieldError().getDefaultMessage());
 
         return errorResponse;
     }
 
     /*---Обработчики для статуса 404 (Not found)---*/
-    @ExceptionHandler
+    @ExceptionHandler({IllegalIdException.class, IncorrectPathVariableException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleIllegalIdException(final IllegalIdException e) {
+    public ErrorResponse handleNotFoundException(final CustomException e) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error(e.getMessage())
                 .adviceToUser(e.getAdviceToUser())
                 .build();
-        log.debug("{}: " + e.getMessage(), IllegalIdException.class.getSimpleName());
-
-        return errorResponse;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleIncorrectPathVariableException(final IncorrectPathVariableException e) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .error(e.getMessage())
-                .adviceToUser(e.getAdviceToUser())
-                .build();
-        log.debug("{}: " + e.getMessage(), IncorrectPathVariableException.class.getSimpleName());
-
-        return errorResponse;
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleInvalidDataBaseQueryException(final InvalidDataBaseQueryException e) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .error(e.getMessage())
-                .adviceToUser(e.getAdviceToUser())
-                .build();
-        log.debug("{}: " + e.getMessage(), InvalidDataBaseQueryException.class.getSimpleName());
+        log.debug("{}: {}", e.getClass().getSimpleName(), e.getMessage());
 
         return errorResponse;
     }
@@ -95,7 +59,7 @@ public class ErrorHandler {
                 .error("Произошла непредвиденная ошибка.")
                 .adviceToUser("Пожалуйста обратитесь в службу технической поддержки.")
                 .build();
-        log.debug("{}: " + e.getMessage(), e.getClass().getSimpleName());
+        log.debug("{}: {}", e.getClass().getSimpleName(), e.getMessage());
 
         return errorResponse;
     }

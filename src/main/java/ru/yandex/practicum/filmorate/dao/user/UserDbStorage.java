@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.IllegalIdException;
-import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.event.Event;
@@ -28,8 +27,6 @@ import java.util.stream.Collectors;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.USER_ALREADY_EXIST_ADVICE;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.USER_ALREADY_EXIST_MESSAGE;
 import static ru.yandex.practicum.filmorate.exception.IllegalIdException.*;
-import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.INVALID_DATA_BASE_QUERY_MESSAGE;
-import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.USER_INVALID_DATA_BASE_QUERY_ADVICE;
 import static ru.yandex.practicum.filmorate.query.SqlQuery.*;
 
 @Repository
@@ -109,18 +106,14 @@ public class UserDbStorage implements UserStorage {
     /*---Получить User по id---*/
     @Override
     public User getUserById(Long userId) {
-        try {
+        if (checkIfUserExists(userId)) {
             String sqlQuery = SQL_QUERY_GET_USER_BY_ID;
             User user = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, userId);
 
             return user;
-        } catch (EmptyResultDataAccessException exception) {
-            log.debug("{}: " + INVALID_DATA_BASE_QUERY_MESSAGE + " Размер ответа на запрос: "
-                    + exception.getExpectedSize(), IllegalIdException.class.getSimpleName());
-            throw new InvalidDataBaseQueryException(INVALID_DATA_BASE_QUERY_MESSAGE,
-                    exception.getExpectedSize(),
-                    USER_INVALID_DATA_BASE_QUERY_ADVICE);
         }
+        log.debug("{}: {}", IllegalIdException.class.getSimpleName(), ILLEGAL_USER_ID_MESSAGE + userId);
+        throw new IllegalIdException(ILLEGAL_USER_ID_MESSAGE + userId, ILLEGAL_USER_ID_ADVICE);
     }
 
     /*---Удалить пользователя по id---*/
@@ -166,7 +159,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     /*---Получить список друзей User---*/
-
     public List<User> getAllFriendsList(Long id) {
         if (checkIfUserExists(id)) {
             String sqlQuery = SQL_QUERY_GET_ALL_FRIEND_LIST;

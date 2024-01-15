@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException;
+import ru.yandex.practicum.filmorate.exception.IllegalIdException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -19,7 +19,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static ru.yandex.practicum.filmorate.exception.AlreadyExistException.USER_ALREADY_EXIST_MESSAGE;
-import static ru.yandex.practicum.filmorate.exception.InvalidDataBaseQueryException.INVALID_DATA_BASE_QUERY_MESSAGE;
+import static ru.yandex.practicum.filmorate.exception.IllegalIdException.ILLEGAL_USER_ID_MESSAGE;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @JdbcTest
@@ -139,39 +139,39 @@ public class UserDbStorageTest {
 
     // Пробуем обновить User c некорректным id:
     @Test
-    void shouldGetInvalidDataBaseQueryExceptionWhenUserIdIs777() {
+    void shouldGetIllegalIdExceptionWhenUserIdIs777() {
         user = user.toBuilder()
                 .id(777L)
                 .build();
 
-        final InvalidDataBaseQueryException exception = assertThrows(
-                InvalidDataBaseQueryException.class,
+        final IllegalIdException exception = assertThrows(
+                IllegalIdException.class,
                 () -> userStorage.updateUser(user));
 
-        assertEquals(INVALID_DATA_BASE_QUERY_MESSAGE, exception.getMessage(),
+        assertEquals(ILLEGAL_USER_ID_MESSAGE + 777, exception.getMessage(),
                 "Обновили User с некорректным id");
     }
 
     // Проверяем получение User по id, которого не существует:
     @Test
-    void shouldGetInvalidDataBaseQueryExceptionWhenGetUserWithIdIs777() {
-        final InvalidDataBaseQueryException exception = assertThrows(
-                InvalidDataBaseQueryException.class,
+    void shouldGetIllegalIdExceptionWhenGetUserWithIdIs777() {
+        final IllegalIdException exception = assertThrows(
+                IllegalIdException.class,
                 () -> userStorage.getUserById(777L));
 
-        assertEquals(INVALID_DATA_BASE_QUERY_MESSAGE, exception.getMessage(),
+        assertEquals(ILLEGAL_USER_ID_MESSAGE + 777, exception.getMessage(),
                 "Ошибка: смогли получить User по несуществующему id.");
     }
 
     // Проверяем получение User по отрицательному id:
     @Test
-    void shouldGetInvalidDataBaseQueryExceptionWhenUSerIdIsNegative() {
-        final InvalidDataBaseQueryException exception = assertThrows(
-                InvalidDataBaseQueryException.class,
+    void shouldGetIllegalIdExceptionWhenUSerIdIsNegative() {
+        final IllegalIdException exception = assertThrows(
+                IllegalIdException.class,
                 () -> userStorage.getUserById(-1L));
 
-        assertEquals(INVALID_DATA_BASE_QUERY_MESSAGE,
-                exception.getMessage(), "Ошибка: метод работает с отрицательным id.");
+        assertEquals(ILLEGAL_USER_ID_MESSAGE + (-1), exception.getMessage(),
+                "Ошибка: метод работает с отрицательным id.");
     }
 
     // name = null:
