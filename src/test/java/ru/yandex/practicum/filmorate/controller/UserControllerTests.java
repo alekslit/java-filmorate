@@ -39,7 +39,6 @@ public class UserControllerTests {
                 .name("Smeshnoi")
                 .birthday(LocalDate.of(1901, 1, 1))
                 .build();
-
     }
 
     @BeforeEach

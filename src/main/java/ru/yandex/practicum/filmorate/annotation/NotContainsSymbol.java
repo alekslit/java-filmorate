@@ -14,7 +14,10 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {NotContainsSymbolValidator.class})
 public @interface NotContainsSymbol {
     String message() default "{Строка не должна содержать выбранный символ}";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
+
     String value() default " ";
 }
